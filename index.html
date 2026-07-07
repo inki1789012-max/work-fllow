@@ -299,6 +299,7 @@
             <div class="export-bar" id="d-exportBar">
               <button class="export-btn" id="d-copyBtn">📋 카피 텍스트 복사</button>
               <button class="export-btn" id="d-downloadBtn">⬇ TXT 파일로 저장</button>
+              <button class="export-btn" id="d-psdBtn">🎨 PSD 파일로 저장</button>
             </div>
 
             <div class="block">
@@ -652,6 +653,250 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // ---------- PSD EXPORT (섹션별 레이어로 나뉜 PSD 파일 생성) ----------
+  // ag-psd 라이브러리를 CDN에서 필요할 때만 불러옵니다 (초기 로딩 속도를 위해).
+  let agPsdLoadPromise = null;
+  function loadAgPsd(){
+    if (window.agPsd) return Promise.resolve(window.agPsd);
+    if (agPsdLoadPromise) return agPsdLoadPromise;
+    agPsdLoadPromise = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/ag-psd/dist/bundle.js';
+      s.onload = ()=> window.agPsd ? resolve(window.agPsd) : reject(new Error('PSD 라이브러리를 불러왔지만 초기화에 실패했습니다.'));
+      s.onerror = ()=> reject(new Error('PSD 라이브러리 로딩에 실패했습니다. 인터넷 연결을 확인해주세요.'));
+      document.head.appendChild(s);
+    });
+    return agPsdLoadPromise;
+  }
+
+  const PSD_FONT = "'Malgun Gothic','Apple SD Gothic Neo',sans-serif";
+  const PSD_COLOR = { forest:'#1F3A2E', paper:'#F2F0E4', persimmon:'#E8632C', ink:'#2D2A26', sage:'#7A8471', chip:'#EDE9DB' };
+
+  function psdRoundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function psdWrapText(ctx, text, maxWidth){
+    const paragraphs = String(text||'').split('\n');
+    const lines = [];
+    paragraphs.forEach(p=>{
+      if(p===''){ lines.push(''); return; }
+      const words = p.split(' ');
+      let cur = '';
+      words.forEach(w=>{
+        const candidate = cur ? cur+' '+w : w;
+        if(ctx.measureText(candidate).width <= maxWidth){
+          cur = candidate;
+        } else {
+          if(cur) lines.push(cur);
+          let piece = w;
+          while(ctx.measureText(piece).width > maxWidth && piece.length > 1){
+            let i = 1;
+            while(i < piece.length && ctx.measureText(piece.slice(0,i)).width <= maxWidth) i++;
+            lines.push(piece.slice(0, Math.max(1,i-1)));
+            piece = piece.slice(Math.max(1,i-1));
+          }
+          cur = piece;
+        }
+      });
+      if(cur) lines.push(cur);
+    });
+    return lines;
+  }
+
+  function psdParagraph(ctx, text, x, y, maxWidth, opts){
+    opts = opts || {};
+    const fontSize = opts.fontSize || 14;
+    const lineHeight = opts.lineHeight || 1.6;
+    const weight = opts.weight || '400';
+    ctx.font = `${weight} ${fontSize}px ${PSD_FONT}`;
+    ctx.fillStyle = opts.color || PSD_COLOR.ink;
+    ctx.textBaseline = 'top';
+    const lines = psdWrapText(ctx, text, maxWidth);
+    lines.forEach((line, i)=> ctx.fillText(line, x, y + i*fontSize*lineHeight));
+    return lines.length * fontSize * lineHeight;
+  }
+
+  function psdMakeSectionCanvas(width, drawFn){
+    const scratch = document.createElement('canvas').getContext('2d');
+    const height = Math.max(1, Math.ceil(drawFn(scratch, width)));
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    drawFn(canvas.getContext('2d'), width);
+    return canvas;
+  }
+
+  const PSD_SECTIONS = [
+    { name:'00_상품정보', draw:(ctx,width,d)=>{
+      const padX=50; let y=40;
+      ctx.font = `700 30px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.forest; ctx.textBaseline='top';
+      ctx.fillText(d.name||'상품명', padX, y); y+=46;
+      ctx.font = `500 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.sage;
+      ctx.fillText(`원산지 ${d.origin||'-'}   ·   중량/구성 ${d.weight||'-'}`, padX, y); y+=30;
+      return y;
+    }},
+    { name:'01_신뢰배지', draw:(ctx,width,d)=>{
+      const padX=50; let y=30, x=padX;
+      ctx.font = `600 13px ${PSD_FONT}`; ctx.textBaseline='middle';
+      (d.badges||[]).forEach(b=>{
+        const bw = ctx.measureText(b).width + 28;
+        if(x+bw > width-padX){ x=padX; y+=42; }
+        ctx.fillStyle = PSD_COLOR.forest; psdRoundRect(ctx,x,y,bw,32,16); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillText(b, x+14, y+16);
+        x += bw+10;
+      });
+      y += 42;
+      if(d.rank){ ctx.font=`500 13px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.sage; ctx.textBaseline='top'; ctx.fillText(d.rank, padX, y); y+=26; }
+      return y+10;
+    }},
+    { name:'02_HOOK', draw:(ctx,width,d)=>{
+      const padX=50; let y=36;
+      ctx.font = `700 26px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink; ctx.textBaseline='top';
+      const lines = psdWrapText(ctx, d.headline||'', width-padX*2);
+      lines.forEach((line,i)=> ctx.fillText(line, padX, y+i*36));
+      y += lines.length*36 + 14;
+      if(d.guarantee_tag){
+        ctx.font=`600 13px ${PSD_FONT}`;
+        const bw = ctx.measureText(d.guarantee_tag).width + 28;
+        ctx.fillStyle=PSD_COLOR.persimmon; psdRoundRect(ctx,padX,y,bw,32,16); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.textBaseline='middle'; ctx.fillText(d.guarantee_tag, padX+14, y+16);
+        y += 32+20;
+      }
+      return y;
+    }},
+    { name:'03_선별기준', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('03 · 선별 기준', padX, y); y+=26;
+      y += psdParagraph(ctx, d.story||'', padX, y, width-padX*2, {fontSize:15, lineHeight:1.7}) + 20;
+      return y;
+    }},
+    { name:'04_비교', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('04 · 비교', padX, y); y+=26;
+      ctx.font=`600 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink; ctx.fillText('일반 판매자', padX, y); y+=24;
+      ctx.font=`400 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.sage;
+      (d.compare_generic||[]).forEach(t=>{ ctx.fillText('· '+t, padX+10, y); y+=24; });
+      y+=10;
+      ctx.font=`600 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.forest; ctx.fillText('대한민국농수산', padX, y); y+=24;
+      ctx.font=`400 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink;
+      (d.compare_ours||[]).forEach(t=>{ ctx.fillText('· '+t, padX+10, y); y+=24; });
+      return y+16;
+    }},
+    { name:'05_품질관리', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('05 · 품질 관리', padX, y); y+=26;
+      ctx.font=`700 18px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink; ctx.fillText(d.process_title||'', padX, y); y+=30;
+      y += psdParagraph(ctx, d.process_body||'', padX, y, width-padX*2, {fontSize:14, lineHeight:1.7}) + 16;
+      return y;
+    }},
+    { name:'06_안전성검사', draw:(ctx,width,d)=>{
+      const padX=50; let y=30, x=padX;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('06 · 안전성 검사', padX, y); y+=26;
+      ctx.font=`500 13px ${PSD_FONT}`; ctx.textBaseline='middle';
+      (d.safety||[]).forEach(s=>{
+        const label = s+': 불검출';
+        const bw = ctx.measureText(label).width + 24;
+        if(x+bw > width-padX){ x=padX; y+=40; }
+        ctx.fillStyle=PSD_COLOR.chip; psdRoundRect(ctx,x,y,bw,30,6); ctx.fill();
+        ctx.fillStyle=PSD_COLOR.ink; ctx.fillText(label, x+12, y+15);
+        x += bw+10;
+      });
+      return y+40;
+    }},
+    { name:'07_후기', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('07 · 후기', padX, y); y+=26;
+      ctx.font=`700 18px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink; ctx.fillText(d.social_headline||'', padX, y); y+=30;
+      ctx.font=`400 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.sage; ctx.fillText('(실제 후기 캡처/발췌로 교체 필요)', padX, y); y+=26;
+      return y;
+    }},
+    { name:'08_책임보상', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('08 · 책임보상', padX, y); y+=26;
+      ctx.font=`400 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink;
+      (d.guarantee||[]).forEach((g,i)=>{ ctx.fillText(`0${i+1}. ${g}`, padX, y); y+=26; });
+      return y+10;
+    }},
+    { name:'09_상품옵션', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('09 · 상품 옵션', padX, y); y+=26;
+      ctx.font=`400 14px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.ink;
+      (d.options||[]).forEach(o=>{ ctx.fillText(`- ${o.name}${o.price?' ('+o.price+')':''}`, padX, y); y+=26; });
+      return y+10;
+    }},
+    { name:'10_QnA', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('10 · Q&A', padX, y); y+=26;
+      (d.faq||[]).forEach(f=>{
+        y += psdParagraph(ctx, 'Q. '+f.q, padX, y, width-padX*2, {fontSize:14, lineHeight:1.5, weight:'600', color:PSD_COLOR.ink}) + 6;
+        y += psdParagraph(ctx, 'A. '+f.a, padX, y, width-padX*2, {fontSize:14, lineHeight:1.5, color:PSD_COLOR.sage}) + 18;
+      });
+      return y;
+    }},
+    { name:'11_상품안내', draw:(ctx,width,d)=>{
+      const padX=50; let y=30;
+      ctx.font=`600 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.persimmon; ctx.textBaseline='top';
+      ctx.fillText('11 · 상품 안내', padX, y); y+=26;
+      y += psdParagraph(ctx, d.final_note||'', padX, y, width-padX*2, {fontSize:14, lineHeight:1.7}) + 30;
+      ctx.strokeStyle='rgba(45,42,38,0.14)'; ctx.beginPath(); ctx.moveTo(padX,y); ctx.lineTo(width-padX,y); ctx.stroke(); y+=20;
+      ctx.font=`400 12px ${PSD_FONT}`; ctx.fillStyle=PSD_COLOR.sage; ctx.textBaseline='top';
+      ctx.fillText(`원산지: ${d.origin||'-'}   중량/구성: ${d.weight||'-'}`, padX, y); y+=30;
+      return y;
+    }},
+  ];
+
+  document.getElementById('d-psdBtn').addEventListener('click', async ()=>{
+    if(!lastDetailData) return;
+    const btn = document.getElementById('d-psdBtn');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'PSD 만드는 중...';
+    try{
+      const agPsd = await loadAgPsd();
+      const d = lastDetailData;
+      const WIDTH = 1000, GAP = 24;
+      let top = 30;
+      const children = [];
+      PSD_SECTIONS.forEach(sec=>{
+        const canvas = psdMakeSectionCanvas(WIDTH, (ctx,w)=> sec.draw(ctx, w, d));
+        children.push({ name: sec.name, canvas, top: Math.round(top), left: 0, bottom: Math.round(top+canvas.height), right: WIDTH });
+        top += canvas.height + GAP;
+      });
+      const totalHeight = Math.round(top);
+      const bg = document.createElement('canvas');
+      bg.width = WIDTH; bg.height = totalHeight;
+      const bgCtx = bg.getContext('2d');
+      bgCtx.fillStyle = PSD_COLOR.paper; bgCtx.fillRect(0,0,WIDTH,totalHeight);
+      children.unshift({ name:'배경', canvas: bg, top:0, left:0, bottom: totalHeight, right: WIDTH });
+
+      const psd = { width: WIDTH, height: totalHeight, children };
+      const buffer = agPsd.writePsdUint8Array(psd);
+      const blob = new Blob([buffer], { type:'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${d.name||'상세페이지'}.psd`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }catch(err){
+      alert('PSD 생성 중 오류가 발생했습니다: ' + err.message);
+    }finally{
+      btn.disabled = false; btn.textContent = original;
+    }
   });
 
   // ---------- MARKETING COPY GENERATOR (기존 유지) ----------
