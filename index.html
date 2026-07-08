@@ -119,13 +119,17 @@
   .story p{ font-size:13px; line-height:1.7; margin:0; }
 
   /* 04 comparison table */
-  .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .compare-col{ border-radius:5px; padding:14px 14px; }
+  .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .compare-col{ border-radius:8px; padding:20px 22px; }
   .compare-col.generic{ background:var(--paper); border:1px solid var(--line); }
   .compare-col.ours{ background:var(--forest); color:var(--paper); }
-  .compare-col .col-title{ font-size:11.5px; font-weight:700; margin-bottom:10px; }
+  .compare-col .col-title{ font-size:14px; font-weight:700; margin-bottom:12px; }
   .compare-col.ours .col-title{ color:var(--harvest); }
-  .compare-col ul{ margin:0; padding-left:16px; font-size:11.5px; line-height:1.8; }
+  .compare-col ul{ margin:0; padding-left:18px; font-size:14px; line-height:2; }
+  .compare-col.generic ul{ list-style:'• '; }
+  .compare-col.ours ul{ list-style:'• '; }
+  .compare-col.generic li::marker{ color:var(--sage); }
+  .compare-col.ours li::marker{ color:var(--harvest); }
 
   /* 05 quality process */
   .process h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
@@ -484,7 +488,7 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
   "badges": ["짧은 신뢰배지 4개 (각 6자 내외)"],
   "headline": "문제제기형 훅 헤드라인 (30자 내외, 예: 어느 하나 부족했던 이유일 수 없었습니다 스타일)",
   "guarantee_tag": "보증 배지 한 줄 (15자 내외)",
-  "story": "선별 기준 설명 (120~160자)",
+  "story": "선별 기준 스토리 (120~180자). 절대 입력값을 그대로 나열하지 말고, 자연스러운 이야기 흐름으로 재구성해줘. ①공감형 질문이나 흔한 불만으로 훅을 걸며 시작 → ②'선별 기준'과 '일반 판매자 대비 강점' 내용을 자연스러운 문장으로 녹여서 설명 → ③고객이 안심할 수 있는 한 문장으로 마무리. 입력에 없는 사실은 절대 지어내지 말고, 표현과 문장 구조만 카피라이터처럼 매끄럽게 다듬어줘.",
   "compare_generic": ["일반 판매자의 한계 3개 (짧게)"],
   "compare_ours": ["우리의 강점 3개 (짧게)"],
   "process_title": "품질관리 소제목 (12자 내외)",
@@ -676,7 +680,7 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
   // 즉 텍스트 내용, 텍스트 위치, 배경 도형 크기/색, 사진 자리 크기 — 전부 레이어별로 독립적으로 자유롭게 수정 가능합니다.
   const PSD_FONT = "'Malgun Gothic','Apple SD Gothic Neo',sans-serif"; // 줄바꿈 계산용(캔버스 측정)
   const PSD_FONT_NAME = 'MalgunGothic'; // PSD 안에 저장되는 폰트 이름(Photoshop이 이 이름으로 폰트를 찾습니다. 없으면 자동 대체됩니다)
-  const PSD_COLOR = { forest:'#1F3A2E', paper:'#F2F0E4', persimmon:'#E8632C', ink:'#2D2A26', sage:'#7A8471', chip:'#EDE9DB' };
+  const PSD_COLOR = { forest:'#1F3A2E', paper:'#F2F0E4', persimmon:'#E8632C', ink:'#2D2A26', sage:'#7A8471', chip:'#EDE9DB', harvest:'#C9A227', white:'#FFFFFF' };
 
   function psdHexToRgb(hex){
     const h = hex.replace('#','');
@@ -820,6 +824,8 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
       const padX=50; let y=6; const layers=[];
       const label = psdBlock('03 · 선별 기준', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
       layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const title = psdBlock('비교할수록 차이가 보입니다', {fontSize:19, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'소제목', x:padX, y, block:title}); y += title.height + 10;
       const s = psdBlock(d.story||'', {fontSize:15, lineHeight:1.7, color:PSD_COLOR.ink, maxWidth:width-padX*2});
       layers.push({type:'text', name:'선별기준_본문', x:padX, y, block:s}); y += s.height;
       return { height:y+16, layers };
@@ -827,16 +833,32 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
     { kind:'text', name:'04_비교', build:(d,width)=>{
       const padX=50; let y=6; const layers=[];
       const label = psdBlock('04 · 비교', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
-      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
-      const t1 = psdBlock('일반 판매자', {fontSize:14, color:PSD_COLOR.ink, maxWidth:width-padX*2});
-      layers.push({type:'text', name:'비교_일반판매자_제목', x:padX, y, block:t1}); y += t1.height + 4;
-      const c1 = psdBlock((d.compare_generic||[]).map(t=>'· '+t).join('\n'), {fontSize:14, color:PSD_COLOR.sage, maxWidth:width-padX*2-10});
-      layers.push({type:'text', name:'비교_일반판매자_내용', x:padX+10, y, block:c1}); y += c1.height + 12;
-      const t2 = psdBlock('대한민국농수산', {fontSize:14, color:PSD_COLOR.forest, maxWidth:width-padX*2});
-      layers.push({type:'text', name:'비교_우리_제목', x:padX, y, block:t2}); y += t2.height + 4;
-      const c2 = psdBlock((d.compare_ours||[]).map(t=>'· '+t).join('\n'), {fontSize:14, color:PSD_COLOR.ink, maxWidth:width-padX*2-10});
-      layers.push({type:'text', name:'비교_우리_내용', x:padX+10, y, block:c2}); y += c2.height + 6;
-      return { height:y+14, layers };
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 12;
+
+      const colGap = 16, boxPad = 22;
+      const colW = (width - padX*2 - colGap) / 2;
+
+      const t1 = psdBlock('일반 판매자', {fontSize:14, color:PSD_COLOR.ink, maxWidth:colW-boxPad*2});
+      const c1 = psdBlock((d.compare_generic||[]).map(t=>'•  '+t).join('\n'), {fontSize:13, lineHeight:1.9, color:PSD_COLOR.sage, maxWidth:colW-boxPad*2});
+      const leftH = boxPad*2 + t1.height + 10 + c1.height;
+
+      const t2 = psdBlock('대한민국농수산', {fontSize:14, color:PSD_COLOR.harvest, maxWidth:colW-boxPad*2});
+      const c2 = psdBlock((d.compare_ours||[]).map(t=>'•  '+t).join('\n'), {fontSize:13, lineHeight:1.9, color:PSD_COLOR.white, maxWidth:colW-boxPad*2});
+      const rightH = boxPad*2 + t2.height + 10 + c2.height;
+
+      const boxH = Math.max(leftH, rightH);
+      const rightX = padX + colW + colGap;
+
+      layers.push({ type:'rect', name:'일반판매자_카드배경', x:padX, y, w:colW, h:boxH, color:PSD_COLOR.paper, radius:8 });
+      layers.push({ type:'rect', name:'대한민국농수산_카드배경', x:rightX, y, w:colW, h:boxH, color:PSD_COLOR.forest, radius:8 });
+
+      layers.push({type:'text', name:'일반판매자_제목', x:padX+boxPad, y:y+boxPad, block:t1});
+      layers.push({type:'text', name:'일반판매자_내용', x:padX+boxPad, y:y+boxPad+t1.height+10, block:c1});
+      layers.push({type:'text', name:'대한민국농수산_제목', x:rightX+boxPad, y:y+boxPad, block:t2});
+      layers.push({type:'text', name:'대한민국농수산_내용', x:rightX+boxPad, y:y+boxPad+t2.height+10, block:c2});
+
+      y += boxH;
+      return { height:y+16, layers };
     }},
     { kind:'text', name:'05_품질관리', build:(d,width)=>{
       const padX=50; let y=6; const layers=[];
@@ -949,12 +971,13 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
         }
         const { height, layers } = sec.build(d, WIDTH);
         layers.forEach(l=>{
-          if(l.type === 'pill'){
+          if(l.type === 'pill' || l.type === 'rect'){
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(l.w)); canvas.height = Math.max(1, Math.round(l.h));
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = l.color;
-            psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.height/2);
+            const radius = l.type === 'pill' ? canvas.height/2 : (l.radius || 0);
+            psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, radius);
             ctx.fill();
             children.push({
               name: `${sec.name}_${l.name}`, canvas,
