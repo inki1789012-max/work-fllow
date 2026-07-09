@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사내 AI 자동화 허브</title>
+<title>주식회사 대한민국농수산</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -119,13 +119,24 @@
   .story p{ font-size:13px; line-height:1.7; margin:0; }
 
   /* 04 comparison table */
-  .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .compare-col{ border-radius:5px; padding:14px 14px; }
+  .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .compare-col{ border-radius:8px; padding:20px 22px; }
   .compare-col.generic{ background:var(--paper); border:1px solid var(--line); }
   .compare-col.ours{ background:var(--forest); color:var(--paper); }
-  .compare-col .col-title{ font-size:11.5px; font-weight:700; margin-bottom:10px; }
+  .compare-col .col-title{ font-size:14px; font-weight:700; margin-bottom:12px; }
   .compare-col.ours .col-title{ color:var(--harvest); }
-  .compare-col ul{ margin:0; padding-left:16px; font-size:11.5px; line-height:1.8; }
+  .compare-col ul{ margin:0; padding-left:18px; font-size:14px; line-height:2; }
+  .compare-col.generic ul{ list-style:'• '; }
+  .compare-col.ours ul{ list-style:'• '; }
+  .compare-col.generic li::marker{ color:var(--sage); }
+  .compare-col.ours li::marker{ color:var(--harvest); }
+
+  .story-points{ display:flex; flex-direction:column; gap:18px; }
+  .story-point{ display:flex; gap:14px; }
+  .story-point .num{ flex-shrink:0; width:30px; height:30px; border-radius:50%; background:var(--forest); color:var(--paper); font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .story-point .body{ flex:1; }
+  .story-point .point{ font-size:15.5px; font-weight:600; color:var(--ink); line-height:1.5; margin-bottom:4px; }
+  .story-point .detail{ font-size:13.5px; color:var(--sage); line-height:1.65; }
 
   /* 05 quality process */
   .process h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
@@ -150,11 +161,11 @@
   .guarantee-item .g-num{ font-family:'JetBrains Mono', monospace; color:var(--persimmon); font-weight:700; margin-right:5px; }
 
   /* 10 options */
-  .option-list{ display:flex; flex-direction:column; gap:8px; }
-  .option-card{ display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:5px; padding:10px 12px; }
-  .option-card .opt-thumb{ width:48px; height:48px; border-radius:4px; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 6px,#E5E0CE 6px,#E5E0CE 12px); flex-shrink:0; }
-  .option-card .opt-name{ font-size:12.5px; font-weight:600; }
-  .option-card .opt-price{ margin-left:auto; font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--persimmon); font-weight:700; }
+  .option-list{ display:flex; flex-direction:column; gap:12px; }
+  .option-card{ display:flex; align-items:center; gap:18px; border:1px solid var(--line); border-radius:8px; padding:18px 20px; }
+  .option-card .opt-thumb{ width:76px; height:76px; border-radius:6px; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 6px,#E5E0CE 6px,#E5E0CE 12px); flex-shrink:0; }
+  .option-card .opt-name{ font-size:17px; font-weight:600; }
+  .option-card .opt-price{ margin-left:auto; font-family:'JetBrains Mono', monospace; font-size:16px; color:var(--persimmon); font-weight:700; }
 
   /* 11 FAQ */
   .faq-item{ border-bottom:1px solid var(--line); padding:12px 0; }
@@ -188,7 +199,7 @@
   <div class="sidebar">
     <div class="brand">
       <div class="brand-mark">AI</div>
-      <h1>산지직송 AI 허브</h1>
+      <h1>주식회사 대한민국농수산</h1>
       <p>internal tools</p>
     </div>
 
@@ -299,6 +310,7 @@
             <div class="export-bar" id="d-exportBar">
               <button class="export-btn" id="d-copyBtn">📋 카피 텍스트 복사</button>
               <button class="export-btn" id="d-downloadBtn">⬇ TXT 파일로 저장</button>
+              <button class="export-btn" id="d-psdBtn">🎨 PSD 파일로 저장</button>
             </div>
 
             <div class="block">
@@ -318,7 +330,7 @@
             <div class="block story">
               <div class="block-label">03 · 선별 기준</div>
               <h3>비교할수록 차이가 보입니다</h3>
-              <p id="d-outStory"></p>
+              <div id="d-outStory" class="story-points"></div>
             </div>
 
             <div class="block">
@@ -425,7 +437,7 @@
     const response = await fetch("/api/generate", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ prompt, max_tokens: 1800 })
+      body: JSON.stringify({ prompt, max_tokens: 2400 })
     });
     const data = await response.json();
     if(!response.ok){ throw new Error(data.error || ('요청 실패 (status '+response.status+')')); }
@@ -466,12 +478,17 @@
       document.getElementById(id).innerHTML = '<span class="skel" style="width:70%;">&nbsp;</span>';
     });
 
-    const prompt = `너는 국내 농수산물 온라인몰의 카피라이터야. 아래는 실제 우리 회사가 쓰는 상세페이지 포맷이야: 신뢰배지 → 훅(문제제기) → 선별기준 스토리 → 경쟁사 비교표 → 품질관리 프로세스 → 안전성검사 → 후기(소셜프루프) → 책임보상 → 상품옵션 → Q&A → 상품안내. 이 순서와 톤을 그대로 따라서 카피를 작성해줘. 과장이나 근거 없는 표현은 쓰지 말고, 입력된 정보 안에서만 작성해.
+    const prompt = `너는 국내 농수산물 온라인몰의 시니어 카피라이터야. 아래는 실제 우리 회사가 쓰는 상세페이지 포맷이야: 신뢰배지 → 훅(문제제기) → 선별기준 스토리 → 경쟁사 비교표 → 품질관리 프로세스 → 안전성검사 → 후기(소셜프루프) → 책임보상 → 상품옵션 → Q&A → 상품안내. 이 순서와 톤을 그대로 따라서 카피를 작성해줘.
+
+중요한 규칙:
+- "상품명" / "원산지" / "중량·구성" / "상품옵션"은 사실 정보이므로 절대 각색하지 말고 입력값 그대로만 사용해(이 항목들은 아래 JSON에도 포함되지 않아).
+- 그 외 모든 항목(배지, 헤드라인, 스토리, 비교, 품질관리, 안전성, 후기, 책임보상, FAQ, 마무리문구)은 사용자가 짧게만 입력했더라도 네가 카피라이터로서 상품의 장점과 매력이 잘 드러나도록 문장을 충분히 살을 붙이고 후킹력 있게 작성해. 다만 없는 수치·인증·순위 등 구체적 사실을 새로 지어내지는 마. 입력에 있는 사실을 바탕으로 "표현과 서술을 확장"하는 것이지 "새로운 사실을 창작"하는 게 아니야.
+- 절대 입력 문구를 그대로 나열하거나 이어붙이지 마. 항상 카피라이터의 문장으로 다시 써.
 
 상품명: ${name}
 원산지: ${origin||'미기재'}
 중량/구성: ${weight||'미기재'}
-선별 기준: ${selection||'미기재'}
+선별 기준(사용자가 줄바꿈으로 여러 항목을 적었을 수 있음): ${selection||'미기재'}
 일반 판매자 대비 강점: ${vs||'미기재'}
 판매실적/랭킹: ${rank||'미기재'}
 안전성 검사 항목: ${safety||'미기재'}
@@ -483,15 +500,20 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
   "badges": ["짧은 신뢰배지 4개 (각 6자 내외)"],
   "headline": "문제제기형 훅 헤드라인 (30자 내외, 예: 어느 하나 부족했던 이유일 수 없었습니다 스타일)",
   "guarantee_tag": "보증 배지 한 줄 (15자 내외)",
-  "story": "선별 기준 설명 (120~160자)",
-  "compare_generic": ["일반 판매자의 한계 3개 (짧게)"],
-  "compare_ours": ["우리의 강점 3개 (짧게)"],
-  "process_title": "품질관리 소제목 (12자 내외)",
-  "process_body": "품질관리 설명 (100~140자)",
-  "social_headline": "후기/판매실적 기반 헤드라인 (20자 내외)",
+  "story_points": [
+    {"point":"'선별 기준'에서 사용자가 입력한 문장(줄바꿈 기준) 하나하나를 자연스러운 한 문장으로 다듬은 것 (35자 내외)", "detail":"그 문장을 뒷받침하는 후킹 부가설명 1~2문장 (60~90자). 왜 이 기준이 중요한지, 고객에게 어떤 이득이 되는지를 설득력 있게 풀어써줘."}
+  ],
+  "compare_generic": ["일반 판매자의 한계 3개 (각 문장으로, 짧고 임팩트있게)"],
+  "compare_ours": ["우리의 강점 3개 (각 문장으로, 구체적이고 신뢰감있게)"],
+  "process_title": "품질관리 소제목 (12자 내외, 후킹력 있게)",
+  "process_body": "품질관리 설명 (100~150자). 입력된 선별기준/강점을 근거로 신뢰가 가도록 서술",
+  "social_headline": "후기/판매실적 기반 헤드라인 (20자 내외, 사회적 증거를 강조하는 훅)",
+  "guarantee_items": ["'보상/보증 정책' 입력을 항목별로 나눠 각각 신뢰감 있는 한 문장으로 다듬은 것 (30자 내외씩)"],
   "faq": [{"q":"질문 그대로 다듬어서","a":"답변 (60~90자, 안심시키는 톤)"}],
-  "final_note": "상품안내 마무리 문구 (80~120자)"
-}`;
+  "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)"
+}
+
+story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.`;
 
     try{
       const r = await callClaudeJSON(prompt);
@@ -506,7 +528,10 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
       document.getElementById('d-guaranteeTag').textContent = r.guarantee_tag||'';
 
       // 03 story
-      document.getElementById('d-outStory').textContent = r.story||'';
+      const storyPoints = r.story_points||[];
+      document.getElementById('d-outStory').innerHTML = storyPoints.length
+        ? storyPoints.map((p,i)=>`<div class="story-point"><div class="num">0${i+1}</div><div class="body"><div class="point">${p.point||''}</div><div class="detail">${p.detail||''}</div></div></div>`).join('')
+        : '';
 
       // 04 compare
       document.getElementById('d-compareGeneric').innerHTML = (r.compare_generic||[]).map(t=>`<li>${t}</li>`).join('');
@@ -528,8 +553,8 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
         `<div class="review-card"><div class="stars">★★★★★</div><p>실제 후기 캡처/발췌 자리</p></div>`
       ).join('');
 
-      // 08 guarantee policy
-      const guaranteeItems = splitList(guarantee);
+      // 08 guarantee policy (AI가 다듬은 문구 사용, 실패 시 원문 그대로 대체)
+      const guaranteeItems = (r.guarantee_items && r.guarantee_items.length) ? r.guarantee_items : splitList(guarantee);
       document.getElementById('d-guaranteeGrid').innerHTML = guaranteeItems.length
         ? guaranteeItems.map((g,i)=>`<div class="guarantee-item"><span class="g-num">0${i+1}</span>${g}</div>`).join('')
         : '<div class="guarantee-item">보상 정책 미기재</div>';
@@ -556,7 +581,7 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
         name, origin, weight,
         badges: r.badges||[], rank,
         headline: r.headline||'', guarantee_tag: r.guarantee_tag||'',
-        story: r.story||'',
+        story_points: storyPoints,
         compare_generic: r.compare_generic||[], compare_ours: r.compare_ours||[],
         process_title: r.process_title||'', process_body: r.process_body||'',
         safety: safetyItems,
@@ -590,7 +615,10 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
     if(d.guarantee_tag) lines.push(`[보증] ${d.guarantee_tag}`);
     lines.push('');
     lines.push('03. 선별 기준 — 비교할수록 차이가 보입니다');
-    lines.push(d.story);
+    (d.story_points||[]).forEach((p,i)=>{
+      lines.push(`  0${i+1}. ${p.point||''}`);
+      lines.push(`      ${p.detail||''}`);
+    });
     lines.push('');
     lines.push('04. 비교');
     lines.push('- 일반 판매자');
@@ -652,6 +680,384 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // ---------- PSD EXPORT (텍스트/이미지 모두 자유롭게 편집 가능한 레이어로 PSD 생성) ----------
+  // ag-psd 라이브러리를 CDN에서 필요할 때만 불러옵니다 (초기 로딩 속도를 위해).
+  let agPsdLoadPromise = null;
+  function loadAgPsd(){
+    if (window.agPsd) return Promise.resolve(window.agPsd);
+    if (agPsdLoadPromise) return agPsdLoadPromise;
+    agPsdLoadPromise = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/ag-psd/dist/bundle.js';
+      s.onload = ()=> window.agPsd ? resolve(window.agPsd) : reject(new Error('PSD 라이브러리를 불러왔지만 초기화에 실패했습니다.'));
+      s.onerror = ()=> reject(new Error('PSD 라이브러리 로딩에 실패했습니다. 인터넷 연결을 확인해주세요.'));
+      document.head.appendChild(s);
+    });
+    return agPsdLoadPromise;
+  }
+
+  // 글자는 전부 "진짜 텍스트 레이어"(더블클릭해서 바로 타이핑 수정 가능),
+  // 배지/보증마크/안전성 칩 배경, 사진 자리는 별도의 "이미지 레이어"로 나뉩니다.
+  // 즉 텍스트 내용, 텍스트 위치, 배경 도형 크기/색, 사진 자리 크기 — 전부 레이어별로 독립적으로 자유롭게 수정 가능합니다.
+  const PSD_FONT = "'Malgun Gothic','Apple SD Gothic Neo',sans-serif"; // 줄바꿈 계산용(캔버스 측정)
+  const PSD_FONT_NAME = 'MalgunGothic'; // PSD 안에 저장되는 폰트 이름(Photoshop이 이 이름으로 폰트를 찾습니다. 없으면 자동 대체됩니다)
+  const PSD_COLOR = { forest:'#1F3A2E', paper:'#F2F0E4', persimmon:'#E8632C', ink:'#2D2A26', sage:'#7A8471', chip:'#EDE9DB', harvest:'#C9A227', white:'#FFFFFF' };
+
+  function psdHexToRgb(hex){
+    const h = hex.replace('#','');
+    return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+  }
+
+  function psdRoundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function psdWrapText(ctx, text, maxWidth){
+    const paragraphs = String(text||'').split('\n');
+    const lines = [];
+    paragraphs.forEach(p=>{
+      if(p===''){ lines.push(''); return; }
+      const words = p.split(' ');
+      let cur = '';
+      words.forEach(w=>{
+        const candidate = cur ? cur+' '+w : w;
+        if(ctx.measureText(candidate).width <= maxWidth){
+          cur = candidate;
+        } else {
+          if(cur) lines.push(cur);
+          let piece = w;
+          while(ctx.measureText(piece).width > maxWidth && piece.length > 1){
+            let i = 1;
+            while(i < piece.length && ctx.measureText(piece.slice(0,i)).width <= maxWidth) i++;
+            lines.push(piece.slice(0, Math.max(1,i-1)));
+            piece = piece.slice(Math.max(1,i-1));
+          }
+          cur = piece;
+        }
+      });
+      if(cur) lines.push(cur);
+    });
+    return lines;
+  }
+
+  // measureCtx: 줄바꿈/너비 계산 전용 캔버스 컨텍스트 (실제로 그리지 않고 너비만 잼)
+  const psdMeasureCtx = document.createElement('canvas').getContext('2d');
+
+  function psdBlock(rawText, opts){
+    opts = opts || {};
+    const fontSize = opts.fontSize || 14;
+    const lineHeight = opts.lineHeight || 1.55;
+    const maxWidth = opts.maxWidth || 900;
+    psdMeasureCtx.font = `${fontSize}px ${PSD_FONT}`;
+    const lines = psdWrapText(psdMeasureCtx, rawText, maxWidth);
+    const height = Math.max(fontSize*lineHeight, lines.length * fontSize * lineHeight);
+    return { text: lines.join('\n'), height, fontSize, lineHeight, color: opts.color||PSD_COLOR.ink };
+  }
+
+  // 상대좌표(x,y)에 실제 편집 가능한 PSD 텍스트 레이어를 만듭니다.
+  function psdTextLayer(name, block, x, y){
+    return {
+      name,
+      text: {
+        text: block.text,
+        transform: [1, 0, 0, 1, x, y + block.fontSize],
+        style: {
+          font: { name: PSD_FONT_NAME },
+          fontSize: block.fontSize,
+          fillColor: psdHexToRgb(block.color),
+        },
+      },
+    };
+  }
+
+  // 배지/보증마크/안전성칩처럼 "알약 모양 배경 + 글자"가 여러 개 가로로 나열/줄바꿈되는 레이아웃을
+  // 배경(이미지 레이어)과 글자(텍스트 레이어)를 각각 별도 레이어로 분리해서 생성합니다.
+  function psdPillRow(items, opts){
+    opts = opts || {};
+    const fontSize = opts.fontSize || 13;
+    const textColor = opts.textColor || '#ffffff';
+    const bgColor = opts.bgColor || PSD_COLOR.forest;
+    const padX = opts.padX ?? 14;
+    const padY = opts.padY ?? 9;
+    const gapX = opts.gapX ?? 10;
+    const gapY = opts.gapY ?? 10;
+    const maxWidth = opts.maxWidth || 900;
+    psdMeasureCtx.font = `600 ${fontSize}px ${PSD_FONT}`;
+    let x=0, y=0, rowH=0;
+    const layers=[];
+    (items||[]).forEach((label,i)=>{
+      const tw = Math.ceil(psdMeasureCtx.measureText(label).width);
+      const pillW = tw + padX*2;
+      const pillH = fontSize + padY*2;
+      if(x + pillW > maxWidth && x>0){ x=0; y += rowH + gapY; rowH=0; }
+      layers.push({ type:'pill', name:`배지${i+1}_배경`, x, y, w:pillW, h:pillH, color:bgColor });
+      layers.push({ type:'text', name:`배지${i+1}_텍스트`, x:x+padX, y:y+(pillH-fontSize)/2-2, block:{ text:label, fontSize, color:textColor } });
+      x += pillW + gapX;
+      rowH = Math.max(rowH, pillH);
+    });
+    return { height: y+rowH, layers };
+  }
+
+  // 각 텍스트 섹션은 (d, width) => { height, layers:[...] } 를 반환합니다.
+  // layers의 x,y는 섹션 내부 상대좌표이며, type:'text'(글자) 또는 type:'pill'(배경 도형)입니다.
+  // 이미지(사진 자리) 섹션은 kind:'image'로 별도 표시합니다.
+  const PSD_SECTIONS = [
+    { kind:'text', name:'00_상품정보', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const b1 = psdBlock(d.name||'상품명', {fontSize:28, color:PSD_COLOR.forest, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'상품명', x:padX, y, block:b1}); y += b1.height + 10;
+      const b2 = psdBlock(`원산지 ${d.origin||'-'}   ·   중량/구성 ${d.weight||'-'}`, {fontSize:13, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'원산지_중량', x:padX, y, block:b2}); y += b2.height + 16;
+      return { height:y, layers };
+    }},
+    { kind:'text', name:'01_신뢰배지', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('01 · 신뢰 배지', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 10;
+      const row = psdPillRow(d.badges||[], { fontSize:13, textColor:'#ffffff', bgColor:PSD_COLOR.forest, maxWidth:width-padX*2 });
+      row.layers.forEach(l=> layers.push(Object.assign({}, l, { x:l.x+padX, y:y+l.y })));
+      y += row.height + 8;
+      if(d.rank){
+        const r = psdBlock(d.rank, {fontSize:13, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+        layers.push({type:'text', name:'판매실적', x:padX, y, block:r}); y += r.height + 6;
+      }
+      return { height:y+10, layers };
+    }},
+    { kind:'text', name:'02_HOOK', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const h = psdBlock(d.headline||'', {fontSize:26, color:PSD_COLOR.ink, lineHeight:1.35, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'헤드라인', x:padX, y, block:h}); y += h.height + 14;
+      if(d.guarantee_tag){
+        const row = psdPillRow([d.guarantee_tag], { fontSize:14, textColor:'#ffffff', bgColor:PSD_COLOR.persimmon, maxWidth:width-padX*2 });
+        row.layers.forEach(l=> layers.push(Object.assign({}, l, { x:l.x+padX, y:y+l.y })));
+        y += row.height + 6;
+      }
+      return { height:y+14, layers };
+    }},
+    { kind:'image', name:'02b_이미지_제품클로즈업', label:'📷 제품 클로즈업 · 손질 과정 사진 자리' },
+    { kind:'text', name:'03_선별기준', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('03 · 선별 기준', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const title = psdBlock('비교할수록 차이가 보입니다', {fontSize:19, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'소제목', x:padX, y, block:title}); y += title.height + 18;
+
+      const numSize = 30, numGap = 14, bodyX = padX + numSize + numGap;
+      (d.story_points||[]).forEach((p,i)=>{
+        const pointBlock = psdBlock(p.point||'', {fontSize:15, color:PSD_COLOR.ink, maxWidth:width-bodyX-padX});
+        const detailBlock = psdBlock(p.detail||'', {fontSize:13, lineHeight:1.65, color:PSD_COLOR.sage, maxWidth:width-bodyX-padX});
+        const rowH = Math.max(numSize, pointBlock.height + 4 + detailBlock.height);
+        layers.push({ type:'pill', name:`포인트${i+1}_번호배경`, x:padX, y, w:numSize, h:numSize, color:PSD_COLOR.forest });
+        layers.push({ type:'text', name:`포인트${i+1}_번호`, x:padX+9, y:y+7, block:{ text:`0${i+1}`, fontSize:12, color:PSD_COLOR.white } });
+        layers.push({ type:'text', name:`포인트${i+1}_문장`, x:bodyX, y, block:pointBlock });
+        layers.push({ type:'text', name:`포인트${i+1}_설명`, x:bodyX, y:y+pointBlock.height+4, block:detailBlock });
+        y += rowH + 20;
+      });
+      return { height:y, layers };
+    }},
+    { kind:'text', name:'04_비교', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('04 · 비교', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 12;
+
+      const colGap = 16, boxPad = 22;
+      const colW = (width - padX*2 - colGap) / 2;
+
+      const t1 = psdBlock('일반 판매자', {fontSize:14, color:PSD_COLOR.ink, maxWidth:colW-boxPad*2});
+      const c1 = psdBlock((d.compare_generic||[]).map(t=>'•  '+t).join('\n'), {fontSize:13, lineHeight:1.9, color:PSD_COLOR.sage, maxWidth:colW-boxPad*2});
+      const leftH = boxPad*2 + t1.height + 10 + c1.height;
+
+      const t2 = psdBlock('대한민국농수산', {fontSize:14, color:PSD_COLOR.harvest, maxWidth:colW-boxPad*2});
+      const c2 = psdBlock((d.compare_ours||[]).map(t=>'•  '+t).join('\n'), {fontSize:13, lineHeight:1.9, color:PSD_COLOR.white, maxWidth:colW-boxPad*2});
+      const rightH = boxPad*2 + t2.height + 10 + c2.height;
+
+      const boxH = Math.max(leftH, rightH);
+      const rightX = padX + colW + colGap;
+
+      layers.push({ type:'rect', name:'일반판매자_카드배경', x:padX, y, w:colW, h:boxH, color:PSD_COLOR.paper, radius:8 });
+      layers.push({ type:'rect', name:'대한민국농수산_카드배경', x:rightX, y, w:colW, h:boxH, color:PSD_COLOR.forest, radius:8 });
+
+      layers.push({type:'text', name:'일반판매자_제목', x:padX+boxPad, y:y+boxPad, block:t1});
+      layers.push({type:'text', name:'일반판매자_내용', x:padX+boxPad, y:y+boxPad+t1.height+10, block:c1});
+      layers.push({type:'text', name:'대한민국농수산_제목', x:rightX+boxPad, y:y+boxPad, block:t2});
+      layers.push({type:'text', name:'대한민국농수산_내용', x:rightX+boxPad, y:y+boxPad+t2.height+10, block:c2});
+
+      y += boxH;
+      return { height:y+16, layers };
+    }},
+    { kind:'text', name:'05_품질관리', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('05 · 품질 관리', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const title = psdBlock(d.process_title||'', {fontSize:18, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'프로세스_제목', x:padX, y, block:title}); y += title.height + 8;
+      const body = psdBlock(d.process_body||'', {fontSize:14, lineHeight:1.7, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'프로세스_본문', x:padX, y, block:body}); y += body.height;
+      return { height:y+16, layers };
+    }},
+    { kind:'image', name:'05b_이미지_중량측정', label:'📷 저울 / 중량 측정 사진 자리' },
+    { kind:'text', name:'06_안전성검사', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('06 · 안전성 검사', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 10;
+      const items = (d.safety||[]).map(s=>s+': 불검출');
+      const row = psdPillRow(items, { fontSize:13, textColor:PSD_COLOR.ink, bgColor:PSD_COLOR.chip, padY:8, maxWidth:width-padX*2 });
+      row.layers.forEach(l=> layers.push(Object.assign({}, l, { x:l.x+padX, y:y+l.y })));
+      y += row.height;
+      return { height:y+14, layers };
+    }},
+    { kind:'text', name:'07_후기', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('07 · 후기', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const h = psdBlock(d.social_headline||'', {fontSize:18, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'후기_헤드라인', x:padX, y, block:h}); y += h.height + 6;
+      const note = psdBlock('(실제 후기 캡처/발췌로 교체 필요)', {fontSize:12, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'후기_안내', x:padX, y, block:note}); y += note.height;
+      return { height:y+14, layers };
+    }},
+    { kind:'text', name:'08_책임보상', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('08 · 책임보상', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const list = (d.guarantee||[]).map((g,i)=>`0${i+1}. ${g}`).join('\n');
+      const b = psdBlock(list, {fontSize:14, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'책임보상_목록', x:padX, y, block:b}); y += b.height;
+      return { height:y+14, layers };
+    }},
+    { kind:'text', name:'09_상품옵션', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('09 · 상품 옵션', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 10;
+
+      const opts = (d.options && d.options.length) ? d.options : [{ name:`${d.name||''} · 기본구성`, price:'' }];
+      const cardW = width - padX*2, cardPad = 18, thumb = 60, cardGap = 12;
+      opts.forEach((o,i)=>{
+        const nameBlock = psdBlock(o.name||'', {fontSize:15, color:PSD_COLOR.ink, maxWidth:cardW-thumb-cardPad*2-160});
+        const cardH = Math.max(96, thumb + cardPad*2, nameBlock.height + cardPad*2);
+        layers.push({ type:'rect', name:`옵션${i+1}_카드배경`, x:padX, y, w:cardW, h:cardH, color:PSD_COLOR.paper, radius:8 });
+        layers.push({ type:'rect', name:`옵션${i+1}_썸네일`, x:padX+cardPad, y:y+(cardH-thumb)/2, w:thumb, h:thumb, color:PSD_COLOR.chip, radius:6 });
+        layers.push({ type:'text', name:`옵션${i+1}_이름`, x:padX+cardPad+thumb+18, y:y+(cardH-nameBlock.height)/2, block:nameBlock });
+        if(o.price){
+          const priceBlock = psdBlock(o.price, {fontSize:14, color:PSD_COLOR.persimmon, maxWidth:140});
+          layers.push({ type:'text', name:`옵션${i+1}_가격`, x:padX+cardW-140-cardPad, y:y+(cardH-priceBlock.height)/2, block:priceBlock });
+        }
+        y += cardH + cardGap;
+      });
+      return { height:y+8, layers };
+    }},
+    { kind:'text', name:'10_QnA', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('10 · Q&A', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      (d.faq||[]).forEach((f,i)=>{
+        const q = psdBlock('Q. '+f.q, {fontSize:14, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+        layers.push({type:'text', name:`FAQ${i+1}_질문`, x:padX, y, block:q}); y += q.height + 4;
+        const a = psdBlock('A. '+f.a, {fontSize:14, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+        layers.push({type:'text', name:`FAQ${i+1}_답변`, x:padX, y, block:a}); y += a.height + 14;
+      });
+      return { height:y+4, layers };
+    }},
+    { kind:'text', name:'11_상품안내', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('11 · 상품 안내', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
+      const note = psdBlock(d.final_note||'', {fontSize:14, lineHeight:1.7, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'상품안내_본문', x:padX, y, block:note}); y += note.height + 20;
+      const foot = psdBlock(`원산지: ${d.origin||'-'}   중량/구성: ${d.weight||'-'}`, {fontSize:12, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'하단_요약', x:padX, y, block:foot}); y += foot.height;
+      return { height:y+16, layers };
+    }},
+  ];
+
+  function psdMakeImagePlaceholder(width, height, label){
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = PSD_COLOR.chip; ctx.fillRect(0,0,width,height);
+    ctx.strokeStyle = '#E5E0CE'; ctx.lineWidth = 14;
+    for(let i=-height; i<width+height; i+=28){
+      ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+height,height); ctx.stroke();
+    }
+    ctx.fillStyle = PSD_COLOR.sage;
+    ctx.font = `500 16px ${PSD_FONT}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label || '이미지 자리', width/2, height/2);
+    return canvas;
+  }
+
+  document.getElementById('d-psdBtn').addEventListener('click', async ()=>{
+    if(!lastDetailData) return;
+    const btn = document.getElementById('d-psdBtn');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'PSD 만드는 중...';
+    try{
+      const agPsd = await loadAgPsd();
+      const d = lastDetailData;
+      const WIDTH = 1000, GAP = 30;
+      let top = 30;
+      const children = [];
+
+      PSD_SECTIONS.forEach(sec=>{
+        if(sec.kind === 'image'){
+          const h = Math.round(WIDTH * 3/4); // 4:3 비율 (사이트와 동일)
+          const canvas = psdMakeImagePlaceholder(WIDTH, h, sec.label);
+          children.push({ name: sec.name, canvas, top: Math.round(top), left:0, bottom: Math.round(top+h), right: WIDTH });
+          top += h + GAP;
+          return;
+        }
+        const { height, layers } = sec.build(d, WIDTH);
+        layers.forEach(l=>{
+          if(l.type === 'pill' || l.type === 'rect'){
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(l.w)); canvas.height = Math.max(1, Math.round(l.h));
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = l.color;
+            const radius = l.type === 'pill' ? canvas.height/2 : (l.radius || 0);
+            psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, radius);
+            ctx.fill();
+            children.push({
+              name: `${sec.name}_${l.name}`, canvas,
+              top: Math.round(top+l.y), left: Math.round(l.x),
+              bottom: Math.round(top+l.y+l.h), right: Math.round(l.x+l.w)
+            });
+          } else {
+            children.push(psdTextLayer(`${sec.name}_${l.name}`, l.block, l.x, Math.round(top + l.y)));
+          }
+        });
+        top += height + GAP;
+      });
+
+      const totalHeight = Math.round(top);
+
+      // 배경(종이색) 레이어 - 단순 배경색 이미지 레이어입니다. 크기/색 자유롭게 수정 가능.
+      const bg = document.createElement('canvas');
+      bg.width = WIDTH; bg.height = totalHeight;
+      const bgCtx = bg.getContext('2d');
+      bgCtx.fillStyle = PSD_COLOR.paper; bgCtx.fillRect(0,0,WIDTH,totalHeight);
+      children.unshift({ name:'배경', canvas: bg, top:0, left:0, bottom: totalHeight, right: WIDTH });
+
+      const psd = { width: WIDTH, height: totalHeight, children };
+      const buffer = agPsd.writePsdUint8Array(psd, { invalidateTextLayers: false });
+      const blob = new Blob([buffer], { type:'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${d.name||'상세페이지'}.psd`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }catch(err){
+      alert('PSD 생성 중 오류가 발생했습니다: ' + err.message);
+    }finally{
+      btn.disabled = false; btn.textContent = original;
+    }
   });
 
   // ---------- MARKETING COPY GENERATOR (기존 유지) ----------
