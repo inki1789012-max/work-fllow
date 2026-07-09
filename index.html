@@ -100,7 +100,10 @@
   .detail-page{ background:var(--white); border:1px solid var(--line); border-radius:6px; overflow:hidden; max-width:520px; margin:0 auto; }
   .block{ padding:26px 28px; border-bottom:1px solid var(--line); }
   .block:last-child{ border-bottom:none; }
-  .block-label{ font-family:'JetBrains Mono', monospace; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--sage); margin-bottom:12px; }
+  .block-label{ font-family:'JetBrains Mono', monospace; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--sage); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .regen-btn{ font-family:inherit; font-size:11px; background:none; border:1px solid var(--line); border-radius:4px; padding:1px 6px; cursor:pointer; color:var(--sage); letter-spacing:0; text-transform:none; line-height:1.6; }
+  .regen-btn:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .regen-btn:disabled{ opacity:0.5; cursor:default; }
 
   .img-placeholder{ width:100%; aspect-ratio:4/3; border-radius:4px; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 8px,#E5E0CE 8px,#E5E0CE 16px); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--sage); text-align:center; padding:10px; }
 
@@ -146,6 +149,20 @@
   .file-name{ font-size:10.5px; color:var(--sage); font-family:'JetBrains Mono', monospace; word-break:break-all; }
   .compare-img-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
   .compare-img-row img, .compare-img-row .img-placeholder{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:6px; }
+
+  .autosave-notice{ font-size:11px; color:var(--sage); background:rgba(122,132,113,0.08); border-radius:5px; padding:8px 10px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .autosave-notice button{ font-size:10.5px; color:var(--persimmon); background:none; border:1px solid var(--persimmon); border-radius:4px; padding:3px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .autosave-notice button:hover{ background:var(--persimmon); color:#fff; }
+
+  .opt-img-upload-list{ display:flex; flex-direction:column; gap:6px; }
+  .opt-img-upload-item{ display:flex; align-items:center; gap:8px; border:1px dashed var(--line); border-radius:5px; padding:6px 8px; }
+  .opt-img-upload-item .opt-img-name{ flex:1; font-size:11px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .opt-img-upload-item .file-btn{ padding:4px 9px; font-size:10.5px; }
+  .opt-img-upload-item .opt-img-thumb{ width:26px; height:26px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#EDE9DB; }
+
+  .preview-toggle{ display:flex; gap:6px; margin-bottom:14px; }
+  .preview-toggle button{ font-family:inherit; font-size:11.5px; padding:6px 12px; border-radius:20px; border:1px solid var(--line); background:var(--white); color:var(--sage); cursor:pointer; }
+  .preview-toggle button.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
 
   /* 05 quality process */
   .process h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
@@ -271,6 +288,8 @@
       <div class="tool-layout">
         <div class="tool-panel">
 
+          <div class="autosave-notice">💾 입력값은 자동 저장돼요 (새로고침해도 유지) <button type="button" id="d-clearSavedBtn">저장값 지우기</button></div>
+
           <div class="panel-group-label">기본 정보</div>
           <div class="field"><label for="d-name">상품명</label><input id="d-name" placeholder="예: 진남 신안 장흥도 흰다리 새우"></div>
           <div class="row2">
@@ -279,6 +298,10 @@
           </div>
           <div class="field"><label for="d-options">상품 옵션 <span class="hint">쉼표로 구분, "이름:가격"</span></label>
             <textarea id="d-options" rows="2" placeholder="급냉 특 왕새우 1kg:32900원, 생물 왕새우 1kg:35900원, 급냉 새우 1kg:24900원"></textarea>
+          </div>
+          <div class="field" id="d-optionImgField" style="display:none;">
+            <label>옵션별 사진 <span class="hint">선택, 없으면 빈 썸네일</span></label>
+            <div class="opt-img-upload-list" id="d-optionImgUploads"></div>
           </div>
 
           <div class="panel-group-label">차별화 포인트</div>
@@ -305,6 +328,23 @@
               </div>
             </div>
           </div>
+          <div class="field">
+            <label>제품 사진 <span class="hint">선택, 없으면 자리표시자로 나와요</span></label>
+            <div class="img-upload-row">
+              <div class="img-upload-item">
+                <span class="img-upload-label">제품 클로즈업 · 손질과정</span>
+                <label class="file-btn" for="d-imgCloseup">파일 선택</label>
+                <input type="file" id="d-imgCloseup" accept="image/*" style="display:none;">
+                <span class="file-name" id="d-imgCloseupName">선택된 파일 없음</span>
+              </div>
+              <div class="img-upload-item">
+                <span class="img-upload-label">저울/중량 측정</span>
+                <label class="file-btn" for="d-imgWeight">파일 선택</label>
+                <input type="file" id="d-imgWeight" accept="image/*" style="display:none;">
+                <span class="file-name" id="d-imgWeightName">선택된 파일 없음</span>
+              </div>
+            </div>
+          </div>
 
           <div class="panel-group-label">신뢰 요소</div>
           <div class="field"><label for="d-rank">판매실적/랭킹 <span class="hint">있는 그대로만</span></label>
@@ -325,6 +365,10 @@
         </div>
 
         <div class="result-area">
+          <div class="preview-toggle" id="d-previewToggle" style="display:none;">
+            <button type="button" data-w="390">📱 모바일</button>
+            <button type="button" class="active" data-w="520">🖥 데스크톱</button>
+          </div>
           <div class="result-empty" id="d-empty">
             <div class="num">Preview</div>
             <h3>왼쪽에 상품 정보를 입력하세요</h3>
@@ -337,30 +381,31 @@
               <button class="export-btn" id="d-copyBtn">📋 카피 텍스트 복사</button>
               <button class="export-btn" id="d-downloadBtn">⬇ TXT 파일로 저장</button>
               <button class="export-btn" id="d-psdBtn">🎨 PSD 파일로 저장</button>
+              <button class="export-btn" id="d-pngBtn">🖼 이미지로 저장 (PNG)</button>
             </div>
 
             <div class="block">
-              <div class="block-label">01 · 신뢰 배지</div>
+              <div class="block-label">01 · 신뢰 배지 <button class="regen-btn" data-key="badges" title="다시 생성">🔄</button></div>
               <div class="badge-strip" id="d-badges"></div>
               <div class="rank-line" id="d-rankLine"></div>
             </div>
 
             <div class="block hook">
-              <div class="block-label">02 · Hook</div>
+              <div class="block-label">02 · Hook <button class="regen-btn" data-key="hook" title="다시 생성">🔄</button></div>
               <h2 id="d-outHeadline"></h2>
               <span class="guarantee-tag" id="d-guaranteeTag"></span>
             </div>
 
-            <div class="block"><div class="img-placeholder">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div></div>
+            <div class="block"><div class="img-placeholder" id="d-closeupImgBox">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div></div>
 
             <div class="block story">
-              <div class="block-label">03 · 선별 기준</div>
+              <div class="block-label">03 · 선별 기준 <button class="regen-btn" data-key="story" title="다시 생성">🔄</button></div>
               <h3>비교할수록 차이가 보입니다</h3>
               <div id="d-outStory" class="story-points"></div>
             </div>
 
             <div class="block">
-              <div class="block-label">04 · 비교</div>
+              <div class="block-label">04 · 비교 <button class="regen-btn" data-key="compare" title="다시 생성">🔄</button></div>
               <div class="compare-img-row" id="d-compareImgRow"></div>
               <div class="compare-grid">
                 <div class="compare-col generic">
@@ -375,12 +420,12 @@
             </div>
 
             <div class="block process">
-              <div class="block-label">05 · 품질 관리</div>
+              <div class="block-label">05 · 품질 관리 <button class="regen-btn" data-key="process" title="다시 생성">🔄</button></div>
               <h3 id="d-processTitle"></h3>
               <p id="d-processBody"></p>
             </div>
 
-            <div class="block"><div class="img-placeholder">📷 저울/중량 측정 사진 자리</div></div>
+            <div class="block"><div class="img-placeholder" id="d-weightImgBox">📷 저울/중량 측정 사진 자리</div></div>
 
             <div class="block">
               <div class="block-label">06 · 안전성 검사</div>
@@ -388,13 +433,13 @@
             </div>
 
             <div class="block social">
-              <div class="block-label">07 · 후기</div>
+              <div class="block-label">07 · 후기 <button class="regen-btn" data-key="social" title="다시 생성">🔄</button></div>
               <h3 id="d-socialHeadline"></h3>
               <div class="review-grid" id="d-reviewGrid"></div>
             </div>
 
             <div class="block">
-              <div class="block-label">08 · 책임보상</div>
+              <div class="block-label">08 · 책임보상 <button class="regen-btn" data-key="guarantee" title="다시 생성">🔄</button></div>
               <div class="guarantee-grid" id="d-guaranteeGrid"></div>
             </div>
 
@@ -404,12 +449,12 @@
             </div>
 
             <div class="block">
-              <div class="block-label">10 · Q&A</div>
+              <div class="block-label">10 · Q&A <button class="regen-btn" data-key="faq" title="다시 생성">🔄</button></div>
               <div id="d-faqList"></div>
             </div>
 
             <div class="block">
-              <div class="block-label">11 · 상품 안내</div>
+              <div class="block-label">11 · 상품 안내 <button class="regen-btn" data-key="final" title="다시 생성">🔄</button></div>
               <p class="final-note" id="d-finalNote"></p>
             </div>
 
@@ -479,8 +524,56 @@
 
   // ---------- DETAIL PAGE GENERATOR ----------
   let lastDetailData = null;
+  // ---------- 입력값 자동 저장 (새로고침해도 유지) ----------
+  // 이 사이트는 실제로 배포된 독립 웹사이트라 localStorage를 정상적으로 사용할 수 있습니다.
+  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-rank','d-safety','d-guarantee','d-faq'];
+  const DETAIL_STORAGE_KEY = 'aihub_detail_form_v1';
+
+  function saveDetailFormState(){
+    const state = {};
+    DETAIL_FORM_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) state[id] = el.value;
+    });
+    try{ localStorage.setItem(DETAIL_STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  function restoreDetailFormState(){
+    let state = null;
+    try{ state = JSON.parse(localStorage.getItem(DETAIL_STORAGE_KEY) || 'null'); }catch(e){}
+    if(!state) return;
+    DETAIL_FORM_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && state[id]) el.value = state[id];
+    });
+  }
+  function wireAutosave(){
+    let saveTimer = null;
+    DETAIL_FORM_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('input', ()=>{
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveDetailFormState, 400);
+      });
+    });
+  }
+  restoreDetailFormState();
+  wireAutosave();
+
+  const clearBtn = document.getElementById('d-clearSavedBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      if(!confirm('저장된 입력값을 모두 지울까요?')) return;
+      try{ localStorage.removeItem(DETAIL_STORAGE_KEY); }catch(e){}
+      DETAIL_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(el) el.value=''; });
+    });
+  }
+
   let genericImgDataUrl = null;
   let oursImgDataUrl = null;
+  let closeupImgDataUrl = null;
+  let weightImgDataUrl = null;
+  let optionImgMap = {}; // { 옵션이름: dataUrl }
 
   function readImageAsDataUrl(fileInput, nameEl, onDone){
     fileInput.addEventListener('change', ()=>{
@@ -494,28 +587,170 @@
   }
   readImageAsDataUrl(document.getElementById('d-imgGeneric'), document.getElementById('d-imgGenericName'), (url)=>{ genericImgDataUrl = url; });
   readImageAsDataUrl(document.getElementById('d-imgOurs'), document.getElementById('d-imgOursName'), (url)=>{ oursImgDataUrl = url; });
+  readImageAsDataUrl(document.getElementById('d-imgCloseup'), document.getElementById('d-imgCloseupName'), (url)=>{
+    closeupImgDataUrl = url;
+    document.getElementById('d-closeupImgBox').outerHTML = url
+      ? `<img id="d-closeupImgBox" src="${url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;">`
+      : `<div class="img-placeholder" id="d-closeupImgBox">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div>`;
+  });
+  readImageAsDataUrl(document.getElementById('d-imgWeight'), document.getElementById('d-imgWeightName'), (url)=>{
+    weightImgDataUrl = url;
+    document.getElementById('d-weightImgBox').outerHTML = url
+      ? `<img id="d-weightImgBox" src="${url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;">`
+      : `<div class="img-placeholder" id="d-weightImgBox">📷 저울/중량 측정 사진 자리</div>`;
+  });
+
+  // ---------- 옵션별 사진 업로드 (상품 옵션 입력값에 맞춰 업로드 칸이 자동으로 생김) ----------
+  function parseOptionNames(){
+    return splitList(document.getElementById('d-options').value.trim()).map(item=>(item.split(':')[0]||'').trim()).filter(Boolean);
+  }
+  function refreshOptionImgUploads(){
+    const names = parseOptionNames();
+    const field = document.getElementById('d-optionImgField');
+    const list = document.getElementById('d-optionImgUploads');
+    if(!names.length){ field.style.display='none'; list.innerHTML=''; return; }
+    field.style.display='block';
+    // 더 이상 존재하지 않는 옵션명은 매핑에서 정리
+    Object.keys(optionImgMap).forEach(k=>{ if(!names.includes(k)) delete optionImgMap[k]; });
+    list.innerHTML = names.map((n,i)=>{
+      const inputId = `d-optImg-${i}`;
+      const thumb = optionImgMap[n] ? `<img class="opt-img-thumb" src="${optionImgMap[n]}">` : `<div class="opt-img-thumb"></div>`;
+      return `<div class="opt-img-upload-item">${thumb}<span class="opt-img-name">${n}</span><label class="file-btn" for="${inputId}">사진</label><input type="file" id="${inputId}" data-optname="${n}" accept="image/*" style="display:none;"></div>`;
+    }).join('');
+    list.querySelectorAll('input[type=file]').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const file = inp.files && inp.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ()=>{ optionImgMap[inp.dataset.optname] = reader.result; refreshOptionImgUploads(); };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+  (function(){
+    let t = null;
+    document.getElementById('d-options').addEventListener('input', ()=>{
+      clearTimeout(t); t = setTimeout(refreshOptionImgUploads, 400);
+    });
+  })();
+  refreshOptionImgUploads();
+
+  document.querySelectorAll('#d-previewToggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#d-previewToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('d-page').style.maxWidth = btn.dataset.w + 'px';
+    });
+  });
+
 
   const dBtn = document.getElementById('d-runBtn');
   const dError = document.getElementById('d-errorBox');
   const dEmpty = document.getElementById('d-empty');
   const dPage = document.getElementById('d-page');
 
+  // 폼 원본 입력값을 한 번에 읽어오는 헬퍼 (전체 생성 / 부분 재생성 둘 다 사용)
+  function readDetailInputs(){
+    return {
+      name: document.getElementById('d-name').value.trim(),
+      origin: document.getElementById('d-origin').value.trim(),
+      weight: document.getElementById('d-weight').value.trim(),
+      optionsRaw: document.getElementById('d-options').value.trim(),
+      selection: document.getElementById('d-selection').value.trim(),
+      vs: document.getElementById('d-vs').value.trim(),
+      rank: document.getElementById('d-rank').value.trim(),
+      safety: document.getElementById('d-safety').value.trim(),
+      guarantee: document.getElementById('d-guarantee').value.trim(),
+      faqRaw: document.getElementById('d-faq').value.trim(),
+    };
+  }
+  function buildContextBlock(inp){
+    return `상품명: ${inp.name}
+원산지: ${inp.origin||'미기재'}
+중량/구성: ${inp.weight||'미기재'}
+선별 기준(사용자가 줄바꿈으로 여러 항목을 적었을 수 있음): ${inp.selection||'미기재'}
+일반 판매자 대비 강점: ${inp.vs||'미기재'}
+판매실적/랭킹: ${inp.rank||'미기재'}
+안전성 검사 항목: ${inp.safety||'미기재'}
+보상/보증 정책: ${inp.guarantee||'미기재'}
+FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}`;
+  }
+  const HOOK_RULES = `후킹력을 높이기 위해 아래 기법들을 적극 활용해:
+- headline: "그동안 왜 ~했을까요?", "~한 적 있으신가요?" 같은 공감형 질문이나, 손실회피(놓치면 아쉬운 점)를 자극하는 문장으로. 뻔한 광고 문구 대신 실제 후기·SNS에서 쓸 법한 자연스러운 구어체를 섞어도 좋아.
+- badges: 숫자·기준이 들어간 게 있으면 우선적으로 앞에 배치 (예: "16브릭스+"처럼 구체적 수치가 신뢰를 높임).
+- story_points의 detail: "왜 이게 고객에게 이득인지"를 감각적 묘사(맛, 식감, 신선함 등)나 비교(보통 vs 우리)로 설명해서 읽는 사람이 머릿속에 그려지게 써.
+- compare_generic/compare_ours: 대비가 뚜렷하게 드러나도록 같은 항목끼리 짝을 맞춰서 써 (예: 일반="기준 없이 혼합 출하" / 우리="16브릭스 이상만 선별").
+- social_headline, final_note: 사회적 증거(후기 수, 재구매율 등 입력에 있는 것만)와 지금 결정해야 할 이유를 자연스럽게 엮어줘.
+- 과장광고성 표현("최고", "무조건", "100% 만족" 같은 근거 없는 절대적 표현)은 피하고, 구체적 근거 기반의 설득으로 신뢰를 쌓는 톤을 유지해.`;
+
+  // ---------- 렌더링 함수 (전체 생성 / 부분 재생성 둘 다 이 함수들을 재사용) ----------
+  function renderBadges(badges){
+    document.getElementById('d-badges').innerHTML = (badges||[]).map(b=>`<span class="badge-chip">${b}</span>`).join('');
+  }
+  function renderRankLine(rank){
+    document.getElementById('d-rankLine').textContent = rank || '';
+  }
+  function renderHook(headline, guarantee_tag){
+    document.getElementById('d-outHeadline').textContent = headline||'';
+    document.getElementById('d-guaranteeTag').textContent = guarantee_tag||'';
+  }
+  function renderStory(storyPoints){
+    document.getElementById('d-outStory').innerHTML = (storyPoints||[]).length
+      ? storyPoints.map((p,i)=>`<div class="story-point"><div class="num">0${i+1}</div><div class="body"><div class="point">${p.point||''}</div><div class="detail">${p.detail||''}</div></div></div>`).join('')
+      : '';
+  }
+  function renderCompareImages(){
+    document.getElementById('d-compareImgRow').innerHTML =
+      (genericImgDataUrl ? `<img src="${genericImgDataUrl}">` : `<div class="img-placeholder">📷 일반 판매자 참고사진 자리</div>`) +
+      (oursImgDataUrl ? `<img src="${oursImgDataUrl}">` : `<div class="img-placeholder">📷 우리 사진 자리</div>`);
+  }
+  function renderCompareText(generic, ours){
+    document.getElementById('d-compareGeneric').innerHTML = (generic||[]).map(t=>`<li>${t}</li>`).join('');
+    document.getElementById('d-compareOurs').innerHTML = (ours||[]).map(t=>`<li>${t}</li>`).join('');
+  }
+  function renderProcess(title, body){
+    document.getElementById('d-processTitle').textContent = title||'';
+    document.getElementById('d-processBody').textContent = body||'';
+  }
+  function renderSafety(safetyItems){
+    document.getElementById('d-safetyGrid').innerHTML = (safetyItems||[]).length
+      ? safetyItems.map(s=>`<div class="safety-chip"><div class="item">${s}</div><div class="result">불검출</div></div>`).join('')
+      : '<div class="safety-chip"><div class="item">검사 항목 미기재</div><div class="result">-</div></div>';
+  }
+  function renderSocial(headline){
+    document.getElementById('d-socialHeadline').textContent = headline||'';
+    document.getElementById('d-reviewGrid').innerHTML = [1,2,3,4].map(()=>
+      `<div class="review-card"><div class="stars">★★★★★</div><p>실제 후기 캡처/발췌 자리</p></div>`
+    ).join('');
+  }
+  function renderGuarantee(items){
+    document.getElementById('d-guaranteeGrid').innerHTML = (items||[]).length
+      ? items.map((g,i)=>`<div class="guarantee-item"><span class="g-num">0${i+1}</span>${g}</div>`).join('')
+      : '<div class="guarantee-item">보상 정책 미기재</div>';
+  }
+  function renderOptions(optList, name, weight){
+    document.getElementById('d-optionList').innerHTML = optList.length
+      ? optList.map(o=>`<div class="option-card"><div class="opt-thumb">${o.img?`<img src="${o.img}">`:''}</div><div class="opt-name">${o.name}</div><div class="opt-price">${o.price||''}</div></div>`).join('')
+      : `<div class="option-card"><div class="opt-thumb"></div><div class="opt-name">${name} · ${weight||'기본구성'}</div><div class="opt-price"></div></div>`;
+  }
+  function renderFaq(faq){
+    document.getElementById('d-faqList').innerHTML = (faq||[]).map(f=>
+      `<div class="faq-item"><div class="faq-q"><span class="qmark">Q.</span>${f.q}</div><div class="faq-a">${f.a}</div></div>`
+    ).join('');
+  }
+  function renderFinal(note){
+    document.getElementById('d-finalNote').textContent = note||'';
+  }
+
   dBtn.addEventListener('click', async ()=>{
-    const name = document.getElementById('d-name').value.trim();
-    const origin = document.getElementById('d-origin').value.trim();
-    const weight = document.getElementById('d-weight').value.trim();
-    const optionsRaw = document.getElementById('d-options').value.trim();
-    const selection = document.getElementById('d-selection').value.trim();
-    const vs = document.getElementById('d-vs').value.trim();
-    const rank = document.getElementById('d-rank').value.trim();
-    const safety = document.getElementById('d-safety').value.trim();
-    const guarantee = document.getElementById('d-guarantee').value.trim();
-    const faqRaw = document.getElementById('d-faq').value.trim();
+    const inp = readDetailInputs();
+    const { name, origin, weight, optionsRaw, selection, vs, rank, safety, guarantee, faqRaw } = inp;
 
     if(!name){ dError.style.display='block'; dError.textContent='상품명은 최소한 입력해주세요.'; return; }
     dError.style.display='none';
     dBtn.disabled=true; dBtn.classList.add('loading'); dBtn.querySelector('.btn-text').textContent='생성 중...';
     dEmpty.style.display='none'; dPage.style.display='block';
+    document.getElementById('d-previewToggle').style.display='flex';
     document.getElementById('d-exportBar').style.display='none';
     ['d-outHeadline','d-outStory','d-processTitle','d-processBody','d-socialHeadline','d-finalNote'].forEach(id=>{
       document.getElementById(id).innerHTML = '<span class="skel" style="width:70%;">&nbsp;</span>';
@@ -528,15 +763,9 @@
 - 그 외 모든 항목(배지, 헤드라인, 스토리, 비교, 품질관리, 안전성, 후기, 책임보상, FAQ, 마무리문구)은 사용자가 짧게만 입력했더라도 네가 카피라이터로서 상품의 장점과 매력이 잘 드러나도록 문장을 충분히 살을 붙이고 후킹력 있게 작성해. 다만 없는 수치·인증·순위 등 구체적 사실을 새로 지어내지는 마. 입력에 있는 사실을 바탕으로 "표현과 서술을 확장"하는 것이지 "새로운 사실을 창작"하는 게 아니야.
 - 절대 입력 문구를 그대로 나열하거나 이어붙이지 마. 항상 카피라이터의 문장으로 다시 써.
 
-상품명: ${name}
-원산지: ${origin||'미기재'}
-중량/구성: ${weight||'미기재'}
-선별 기준(사용자가 줄바꿈으로 여러 항목을 적었을 수 있음): ${selection||'미기재'}
-일반 판매자 대비 강점: ${vs||'미기재'}
-판매실적/랭킹: ${rank||'미기재'}
-안전성 검사 항목: ${safety||'미기재'}
-보상/보증 정책: ${guarantee||'미기재'}
-FAQ로 다룰 질문: ${faqRaw||'미기재'}
+${HOOK_RULES}
+
+${buildContextBlock(inp)}
 
 아래 JSON 형식으로만 응답해. 다른 설명이나 코드블록 표시 없이 순수 JSON만 출력해:
 {
@@ -561,66 +790,26 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
     try{
       const r = await callClaudeJSON(prompt);
 
-      // 01 badges
-      const badgeWrap = document.getElementById('d-badges');
-      badgeWrap.innerHTML = (r.badges||[]).map(b=>`<span class="badge-chip">${b}</span>`).join('');
-      document.getElementById('d-rankLine').textContent = rank || '';
-
-      // 02 hook
-      document.getElementById('d-outHeadline').textContent = r.headline||'';
-      document.getElementById('d-guaranteeTag').textContent = r.guarantee_tag||'';
-
-      // 03 story
+      renderBadges(r.badges); renderRankLine(rank);
+      renderHook(r.headline, r.guarantee_tag);
       const storyPoints = r.story_points||[];
-      document.getElementById('d-outStory').innerHTML = storyPoints.length
-        ? storyPoints.map((p,i)=>`<div class="story-point"><div class="num">0${i+1}</div><div class="body"><div class="point">${p.point||''}</div><div class="detail">${p.detail||''}</div></div></div>`).join('')
-        : '';
-
-      // 04 compare
-      document.getElementById('d-compareImgRow').innerHTML =
-        (genericImgDataUrl ? `<img src="${genericImgDataUrl}">` : `<div class="img-placeholder">📷 일반 판매자 참고사진 자리</div>`) +
-        (oursImgDataUrl ? `<img src="${oursImgDataUrl}">` : `<div class="img-placeholder">📷 우리 사진 자리</div>`);
-      document.getElementById('d-compareGeneric').innerHTML = (r.compare_generic||[]).map(t=>`<li>${t}</li>`).join('');
-      document.getElementById('d-compareOurs').innerHTML = (r.compare_ours||[]).map(t=>`<li>${t}</li>`).join('');
-
-      // 05 process
-      document.getElementById('d-processTitle').textContent = r.process_title||'';
-      document.getElementById('d-processBody').textContent = r.process_body||'';
-
-      // 06 safety
+      renderStory(storyPoints);
+      renderCompareImages();
+      renderCompareText(r.compare_generic, r.compare_ours);
+      renderProcess(r.process_title, r.process_body);
       const safetyItems = splitList(safety);
-      document.getElementById('d-safetyGrid').innerHTML = safetyItems.length
-        ? safetyItems.map(s=>`<div class="safety-chip"><div class="item">${s}</div><div class="result">불검출</div></div>`).join('')
-        : '<div class="safety-chip"><div class="item">검사 항목 미기재</div><div class="result">-</div></div>';
-
-      // 07 social proof + reviews (placeholder review cards, 실제 후기는 캡처 이미지로 교체 예정)
-      document.getElementById('d-socialHeadline').textContent = r.social_headline||'';
-      document.getElementById('d-reviewGrid').innerHTML = [1,2,3,4].map(()=>
-        `<div class="review-card"><div class="stars">★★★★★</div><p>실제 후기 캡처/발췌 자리</p></div>`
-      ).join('');
-
-      // 08 guarantee policy (AI가 다듬은 문구 사용, 실패 시 원문 그대로 대체)
+      renderSafety(safetyItems);
+      renderSocial(r.social_headline);
       const guaranteeItems = (r.guarantee_items && r.guarantee_items.length) ? r.guarantee_items : splitList(guarantee);
-      document.getElementById('d-guaranteeGrid').innerHTML = guaranteeItems.length
-        ? guaranteeItems.map((g,i)=>`<div class="guarantee-item"><span class="g-num">0${i+1}</span>${g}</div>`).join('')
-        : '<div class="guarantee-item">보상 정책 미기재</div>';
-
-      // 09 options
+      renderGuarantee(guaranteeItems);
       const optList = splitList(optionsRaw).map(item=>{
         const parts = item.split(':');
-        return { name: (parts[0]||'').trim(), price: (parts[1]||'').trim() };
+        const optName = (parts[0]||'').trim();
+        return { name: optName, price: (parts[1]||'').trim(), img: optionImgMap[optName] || null };
       });
-      document.getElementById('d-optionList').innerHTML = optList.length
-        ? optList.map(o=>`<div class="option-card"><div class="opt-thumb"></div><div class="opt-name">${o.name}</div><div class="opt-price">${o.price||''}</div></div>`).join('')
-        : `<div class="option-card"><div class="opt-thumb"></div><div class="opt-name">${name} · ${weight||'기본구성'}</div><div class="opt-price"></div></div>`;
-
-      // 10 faq
-      document.getElementById('d-faqList').innerHTML = (r.faq||[]).map(f=>
-        `<div class="faq-item"><div class="faq-q"><span class="qmark">Q.</span>${f.q}</div><div class="faq-a">${f.a}</div></div>`
-      ).join('');
-
-      // 11 final note
-      document.getElementById('d-finalNote').textContent = r.final_note||'';
+      renderOptions(optList, name, weight);
+      renderFaq(r.faq);
+      renderFinal(r.final_note);
 
       // 내보내기용 데이터 저장
       lastDetailData = {
@@ -630,6 +819,7 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
         story_points: storyPoints,
         compare_generic: r.compare_generic||[], compare_ours: r.compare_ours||[],
         compareImgGeneric: genericImgDataUrl, compareImgOurs: oursImgDataUrl,
+        closeupImg: closeupImgDataUrl, weightImg: weightImgDataUrl,
         process_title: r.process_title||'', process_body: r.process_body||'',
         safety: safetyItems,
         social_headline: r.social_headline||'',
@@ -646,6 +836,92 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
     }finally{
       dBtn.disabled=false; dBtn.classList.remove('loading'); dBtn.querySelector('.btn-text').textContent='AI로 초안 생성';
     }
+  });
+
+  // ---------- 부분 재생성 (섹션 하나만 새로 다시 써줘) ----------
+  const REGEN_FIELDS = {
+    badges: {
+      label: '신뢰배지',
+      instruction: '신뢰배지 4개만 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"badges": ["짧은 신뢰배지 4개 (각 6자 내외)"]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.badges = r.badges||[]; renderBadges(lastDetailData.badges); }
+    },
+    hook: {
+      label: 'HOOK',
+      instruction: '훅 헤드라인과 보증배지 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"headline":"문제제기형 훅 헤드라인 (30자 내외)","guarantee_tag":"보증 배지 한 줄 (15자 내외)"}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.headline=r.headline||''; lastDetailData.guarantee_tag=r.guarantee_tag||''; renderHook(lastDetailData.headline, lastDetailData.guarantee_tag); }
+    },
+    story: {
+      label: '선별 기준',
+      instruction: '선별 기준 story_points를 표현을 바꿔서 새 버전으로 다시 만들어줘 (문장 자체를 다르게 써줘).',
+      schema: '{"story_points":[{"point":"...(35자 내외)","detail":"...(60~90자)"}]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.story_points=r.story_points||[]; renderStory(lastDetailData.story_points); }
+    },
+    compare: {
+      label: '비교',
+      instruction: '비교표(일반 판매자 한계 3개, 우리 강점 3개)를 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"compare_generic":["...(각 12~18자)"],"compare_ours":["...(각 12~18자)"]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.compare_generic=r.compare_generic||[]; lastDetailData.compare_ours=r.compare_ours||[]; renderCompareText(lastDetailData.compare_generic, lastDetailData.compare_ours); }
+    },
+    process: {
+      label: '품질관리',
+      instruction: '품질관리 소제목/설명을 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"process_title":"...(12자 내외)","process_body":"...(100~150자)"}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.process_title=r.process_title||''; lastDetailData.process_body=r.process_body||''; renderProcess(lastDetailData.process_title, lastDetailData.process_body); }
+    },
+    social: {
+      label: '후기',
+      instruction: '후기 헤드라인을 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"social_headline":"...(20자 내외)"}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.social_headline=r.social_headline||''; renderSocial(lastDetailData.social_headline); }
+    },
+    guarantee: {
+      label: '책임보상',
+      instruction: '책임보상 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"guarantee_items":["...(30자 내외씩)"]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.guarantee=r.guarantee_items||[]; renderGuarantee(lastDetailData.guarantee); }
+    },
+    faq: {
+      label: 'Q&A',
+      instruction: 'FAQ 답변을 표현을 바꿔서 새 버전으로 다시 만들어줘 (질문은 유지).',
+      schema: '{"faq":[{"q":"...","a":"...(60~90자)"}]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.faq=r.faq||[]; renderFaq(lastDetailData.faq); }
+    },
+    final: {
+      label: '상품안내',
+      instruction: '상품안내 마무리 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"final_note":"...(80~130자)"}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.final_note=r.final_note||''; renderFinal(lastDetailData.final_note); }
+    },
+  };
+
+  async function regenerateSection(key, btn){
+    if(!lastDetailData){ return; }
+    const field = REGEN_FIELDS[key];
+    if(!field) return;
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = '⏳';
+    try{
+      const inp = readDetailInputs();
+      const prompt = `너는 국내 농수산물 온라인몰의 시니어 카피라이터야. ${field.instruction} 절대 입력값을 그대로 나열하지 말고 카피라이터 문장으로 다시 써.
+
+${HOOK_RULES}
+
+${buildContextBlock(inp)}
+
+아래 JSON 형식으로만 응답해. 다른 설명이나 코드블록 표시 없이 순수 JSON만 출력해:
+${field.schema}`;
+      const r = await callClaudeJSON(prompt);
+      field.apply(r);
+    }catch(err){
+      alert(`${field.label} 재생성 중 오류: ` + err.message);
+    }finally{
+      btn.disabled = false; btn.textContent = original;
+    }
+  }
+  document.querySelectorAll('.regen-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> regenerateSection(btn.dataset.key, btn));
   });
 
   function buildDetailText(d){
@@ -744,6 +1020,41 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
     });
     return agPsdLoadPromise;
   }
+
+  // ---------- PNG 이미지 저장 (화면에 보이는 그대로 캡처, 스마트스토어 업로드용) ----------
+  let html2canvasLoadPromise = null;
+  function loadHtml2Canvas(){
+    if (window.html2canvas) return Promise.resolve(window.html2canvas);
+    if (html2canvasLoadPromise) return html2canvasLoadPromise;
+    html2canvasLoadPromise = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = ()=> window.html2canvas ? resolve(window.html2canvas) : reject(new Error('이미지 저장 라이브러리 초기화에 실패했습니다.'));
+      s.onerror = ()=> reject(new Error('이미지 저장 라이브러리 로딩에 실패했습니다. 인터넷 연결을 확인해주세요.'));
+      document.head.appendChild(s);
+    });
+    return html2canvasLoadPromise;
+  }
+
+  document.getElementById('d-pngBtn').addEventListener('click', async ()=>{
+    if(!lastDetailData) return;
+    const btn = document.getElementById('d-pngBtn');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = '이미지 만드는 중...';
+    try{
+      const html2canvas = await loadHtml2Canvas();
+      const target = document.getElementById('d-page');
+      const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `${lastDetailData.name||'상세페이지'}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }catch(err){
+      alert('이미지 생성 중 오류가 발생했습니다: ' + err.message);
+    }finally{
+      btn.disabled = false; btn.textContent = original;
+    }
+  });
 
   // 글자는 전부 "진짜 텍스트 레이어"(더블클릭해서 바로 타이핑 수정 가능),
   // 배지/보증마크/안전성 칩 배경, 사진 자리는 별도의 "이미지 레이어"로 나뉩니다.
@@ -889,7 +1200,7 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       }
       return { height:y+14, layers };
     }},
-    { kind:'image', name:'02b_이미지_제품클로즈업', label:'📷 제품 클로즈업 · 손질 과정 사진 자리' },
+    { kind:'image', name:'02b_이미지_제품클로즈업', label:'📷 제품 클로즈업 · 손질 과정 사진 자리', imgKey:'closeupImg' },
     { kind:'text', name:'03_선별기준', build:(d,width)=>{
       const padX=50; let y=6; const layers=[];
       const label = psdBlock('03 · 선별 기준', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
@@ -950,7 +1261,7 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       layers.push({type:'text', name:'프로세스_본문', x:padX, y, block:body}); y += body.height;
       return { height:y+16, layers };
     }},
-    { kind:'image', name:'05b_이미지_중량측정', label:'📷 저울 / 중량 측정 사진 자리' },
+    { kind:'image', name:'05b_이미지_중량측정', label:'📷 저울 / 중량 측정 사진 자리', imgKey:'weightImg' },
     { kind:'text', name:'06_안전성검사', build:(d,width)=>{
       const padX=50; let y=6; const layers=[];
       const label = psdBlock('06 · 안전성 검사', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
@@ -980,18 +1291,19 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       layers.push({type:'text', name:'책임보상_목록', x:padX, y, block:b}); y += b.height;
       return { height:y+14, layers };
     }},
-    { kind:'text', name:'09_상품옵션', build:(d,width)=>{
+    { kind:'text', name:'09_상품옵션', build:(d,width,extra)=>{
       const padX=50; let y=6; const layers=[];
       const label = psdBlock('09 · 상품 옵션', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
       layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 10;
 
       const opts = (d.options && d.options.length) ? d.options : [{ name:`${d.name||''} · 기본구성`, price:'' }];
+      const optionImages = (extra && extra.optionImages) || [];
       const cardW = width - padX*2, cardPad = 18, thumb = 60, cardGap = 12;
       opts.forEach((o,i)=>{
         const nameBlock = psdBlock(o.name||'', {fontSize:15, color:PSD_COLOR.ink, maxWidth:cardW-thumb-cardPad*2-160});
         const cardH = Math.max(96, thumb + cardPad*2, nameBlock.height + cardPad*2);
         layers.push({ type:'rect', name:`옵션${i+1}_카드배경`, x:padX, y, w:cardW, h:cardH, color:PSD_COLOR.paper, radius:8 });
-        layers.push({ type:'rect', name:`옵션${i+1}_썸네일`, x:padX+cardPad, y:y+(cardH-thumb)/2, w:thumb, h:thumb, color:PSD_COLOR.chip, radius:6 });
+        layers.push({ type:'rect', name:`옵션${i+1}_썸네일`, x:padX+cardPad, y:y+(cardH-thumb)/2, w:thumb, h:thumb, color:PSD_COLOR.chip, radius:6, image: optionImages[i]||null });
         layers.push({ type:'text', name:`옵션${i+1}_이름`, x:padX+cardPad+thumb+18, y:y+(cardH-nameBlock.height)/2, block:nameBlock });
         if(o.price){
           const priceBlock = psdBlock(o.price, {fontSize:14, color:PSD_COLOR.persimmon, maxWidth:140});
@@ -1071,9 +1383,12 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       let top = 30;
       const children = [];
 
-      const [genericImg, oursImg] = await Promise.all([
-        psdLoadImage(d.compareImgGeneric), psdLoadImage(d.compareImgOurs)
+      const [genericImg, oursImg, closeupImg, weightImg] = await Promise.all([
+        psdLoadImage(d.compareImgGeneric), psdLoadImage(d.compareImgOurs),
+        psdLoadImage(d.closeupImg), psdLoadImage(d.weightImg)
       ]);
+      const psdUploadedImages = { closeupImg, weightImg };
+      const optionImages = await Promise.all((d.options||[]).map(o=>psdLoadImage(o.img)));
 
       PSD_SECTIONS.forEach(sec=>{
         if(sec.name === '04_비교'){
@@ -1094,21 +1409,33 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
         }
         if(sec.kind === 'image'){
           const h = Math.round(WIDTH * 3/4); // 4:3 비율 (사이트와 동일)
-          const canvas = psdMakeImagePlaceholder(WIDTH, h, sec.label);
+          const uploaded = sec.imgKey ? psdUploadedImages[sec.imgKey] : null;
+          const canvas = document.createElement('canvas');
+          canvas.width = WIDTH; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if(uploaded){ psdDrawImageCover(ctx, uploaded, 0, 0, WIDTH, h); }
+          else { ctx.drawImage(psdMakeImagePlaceholder(WIDTH, h, sec.label), 0, 0); }
           children.push({ name: sec.name, canvas, top: Math.round(top), left:0, bottom: Math.round(top+h), right: WIDTH });
           top += h + GAP;
           return;
         }
-        const { height, layers } = sec.build(d, WIDTH);
+        const { height, layers } = sec.build(d, WIDTH, { optionImages });
         layers.forEach(l=>{
           if(l.type === 'pill' || l.type === 'rect'){
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(l.w)); canvas.height = Math.max(1, Math.round(l.h));
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = l.color;
             const radius = l.type === 'pill' ? canvas.height/2 : (l.radius || 0);
-            psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, radius);
-            ctx.fill();
+            if(l.image){
+              psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, radius);
+              ctx.save(); ctx.clip();
+              psdDrawImageCover(ctx, l.image, 0, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } else {
+              ctx.fillStyle = l.color;
+              psdRoundRect(ctx, 0, 0, canvas.width, canvas.height, radius);
+              ctx.fill();
+            }
             children.push({
               name: `${sec.name}_${l.name}`, canvas,
               top: Math.round(top+l.y), left: Math.round(l.x),
