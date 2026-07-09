@@ -138,6 +138,15 @@
   .story-point .point{ font-size:15.5px; font-weight:600; color:var(--ink); line-height:1.5; margin-bottom:4px; }
   .story-point .detail{ font-size:13.5px; color:var(--sage); line-height:1.65; }
 
+  .img-upload-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .img-upload-item{ border:1px dashed var(--line); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+  .img-upload-label{ font-size:11px; color:var(--sage); font-weight:600; }
+  .file-btn{ display:inline-block; padding:6px 12px; border-radius:4px; background:var(--forest); color:var(--paper); font-size:11.5px; font-weight:600; cursor:pointer; }
+  .file-btn:hover{ background:var(--forest-light); }
+  .file-name{ font-size:10.5px; color:var(--sage); font-family:'JetBrains Mono', monospace; word-break:break-all; }
+  .compare-img-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .compare-img-row img, .compare-img-row .img-placeholder{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:6px; }
+
   /* 05 quality process */
   .process h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
   .process p{ font-size:13px; line-height:1.7; margin:0; }
@@ -279,6 +288,23 @@
           <div class="field"><label for="d-vs">일반 판매자 대비 강점 <span class="hint">비교표에 사용</span></label>
             <textarea id="d-vs" rows="2" placeholder="무게치기(물빼기 속임) 없음, 정량 그대로 배송, 안전성 검사 완료"></textarea>
           </div>
+          <div class="field">
+            <label>비교 이미지 <span class="hint">선택, 비교표 위에 표시됩니다</span></label>
+            <div class="img-upload-row">
+              <div class="img-upload-item">
+                <span class="img-upload-label">일반 판매자 참고사진</span>
+                <label class="file-btn" for="d-imgGeneric">파일 선택</label>
+                <input type="file" id="d-imgGeneric" accept="image/*" style="display:none;">
+                <span class="file-name" id="d-imgGenericName">선택된 파일 없음</span>
+              </div>
+              <div class="img-upload-item">
+                <span class="img-upload-label">우리 사진</span>
+                <label class="file-btn" for="d-imgOurs">파일 선택</label>
+                <input type="file" id="d-imgOurs" accept="image/*" style="display:none;">
+                <span class="file-name" id="d-imgOursName">선택된 파일 없음</span>
+              </div>
+            </div>
+          </div>
 
           <div class="panel-group-label">신뢰 요소</div>
           <div class="field"><label for="d-rank">판매실적/랭킹 <span class="hint">있는 그대로만</span></label>
@@ -335,6 +361,7 @@
 
             <div class="block">
               <div class="block-label">04 · 비교</div>
+              <div class="compare-img-row" id="d-compareImgRow"></div>
               <div class="compare-grid">
                 <div class="compare-col generic">
                   <div class="col-title">일반 판매자</div>
@@ -452,6 +479,22 @@
 
   // ---------- DETAIL PAGE GENERATOR ----------
   let lastDetailData = null;
+  let genericImgDataUrl = null;
+  let oursImgDataUrl = null;
+
+  function readImageAsDataUrl(fileInput, nameEl, onDone){
+    fileInput.addEventListener('change', ()=>{
+      const file = fileInput.files && fileInput.files[0];
+      if(!file){ nameEl.textContent = '선택된 파일 없음'; onDone(null); return; }
+      nameEl.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = ()=> onDone(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+  readImageAsDataUrl(document.getElementById('d-imgGeneric'), document.getElementById('d-imgGenericName'), (url)=>{ genericImgDataUrl = url; });
+  readImageAsDataUrl(document.getElementById('d-imgOurs'), document.getElementById('d-imgOursName'), (url)=>{ oursImgDataUrl = url; });
+
   const dBtn = document.getElementById('d-runBtn');
   const dError = document.getElementById('d-errorBox');
   const dEmpty = document.getElementById('d-empty');
@@ -503,8 +546,8 @@ FAQ로 다룰 질문: ${faqRaw||'미기재'}
   "story_points": [
     {"point":"'선별 기준'에서 사용자가 입력한 문장(줄바꿈 기준) 하나하나를 자연스러운 한 문장으로 다듬은 것 (35자 내외)", "detail":"그 문장을 뒷받침하는 후킹 부가설명 1~2문장 (60~90자). 왜 이 기준이 중요한지, 고객에게 어떤 이득이 되는지를 설득력 있게 풀어써줘."}
   ],
-  "compare_generic": ["일반 판매자의 한계 3개 (각 문장으로, 짧고 임팩트있게)"],
-  "compare_ours": ["우리의 강점 3개 (각 문장으로, 구체적이고 신뢰감있게)"],
+  "compare_generic": ["일반 판매자의 한계 3개 (각 12~18자, 짧고 임팩트있게 한 줄로)"],
+  "compare_ours": ["우리의 강점 3개 (각 12~18자, 짧고 임팩트있게 한 줄로)"],
   "process_title": "품질관리 소제목 (12자 내외, 후킹력 있게)",
   "process_body": "품질관리 설명 (100~150자). 입력된 선별기준/강점을 근거로 신뢰가 가도록 서술",
   "social_headline": "후기/판매실적 기반 헤드라인 (20자 내외, 사회적 증거를 강조하는 훅)",
@@ -534,6 +577,9 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
         : '';
 
       // 04 compare
+      document.getElementById('d-compareImgRow').innerHTML =
+        (genericImgDataUrl ? `<img src="${genericImgDataUrl}">` : `<div class="img-placeholder">📷 일반 판매자 참고사진 자리</div>`) +
+        (oursImgDataUrl ? `<img src="${oursImgDataUrl}">` : `<div class="img-placeholder">📷 우리 사진 자리</div>`);
       document.getElementById('d-compareGeneric').innerHTML = (r.compare_generic||[]).map(t=>`<li>${t}</li>`).join('');
       document.getElementById('d-compareOurs').innerHTML = (r.compare_ours||[]).map(t=>`<li>${t}</li>`).join('');
 
@@ -583,6 +629,7 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
         headline: r.headline||'', guarantee_tag: r.guarantee_tag||'',
         story_points: storyPoints,
         compare_generic: r.compare_generic||[], compare_ours: r.compare_ours||[],
+        compareImgGeneric: genericImgDataUrl, compareImgOurs: oursImgDataUrl,
         process_title: r.process_title||'', process_body: r.process_body||'',
         safety: safetyItems,
         social_headline: r.social_headline||'',
@@ -994,6 +1041,24 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
     return canvas;
   }
 
+  // 사용자가 업로드한 사진을 PSD에도 실제로 넣기 위한 헬퍼
+  function psdLoadImage(dataUrl){
+    return new Promise((resolve)=>{
+      if(!dataUrl){ resolve(null); return; }
+      const img = new Image();
+      img.onload = ()=> resolve(img);
+      img.onerror = ()=> resolve(null);
+      img.src = dataUrl;
+    });
+  }
+  function psdDrawImageCover(ctx, img, x, y, w, h){
+    const ir = img.width / img.height, tr = w / h;
+    let sx, sy, sw, sh;
+    if(ir > tr){ sh = img.height; sw = sh * tr; sx = (img.width - sw)/2; sy = 0; }
+    else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh)/2; }
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+
   document.getElementById('d-psdBtn').addEventListener('click', async ()=>{
     if(!lastDetailData) return;
     const btn = document.getElementById('d-psdBtn');
@@ -1006,7 +1071,27 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       let top = 30;
       const children = [];
 
+      const [genericImg, oursImg] = await Promise.all([
+        psdLoadImage(d.compareImgGeneric), psdLoadImage(d.compareImgOurs)
+      ]);
+
       PSD_SECTIONS.forEach(sec=>{
+        if(sec.name === '04_비교'){
+          // 비교표 위 사진 (업로드된 사진이 있으면 실제 사진을, 없으면 자리표시자를 넣습니다)
+          const padX=50, imgGap=14;
+          const colW = (WIDTH - padX*2 - imgGap) / 2;
+          const imgH = Math.round(colW * 3/4);
+          const rowCanvas = document.createElement('canvas');
+          rowCanvas.width = WIDTH; rowCanvas.height = imgH;
+          const rowCtx = rowCanvas.getContext('2d');
+          if(genericImg){ psdDrawImageCover(rowCtx, genericImg, padX, 0, colW, imgH); }
+          else { rowCtx.drawImage(psdMakeImagePlaceholder(colW, imgH, '일반 판매자 참고사진'), padX, 0); }
+          const rightX = padX + colW + imgGap;
+          if(oursImg){ psdDrawImageCover(rowCtx, oursImg, rightX, 0, colW, imgH); }
+          else { rowCtx.drawImage(psdMakeImagePlaceholder(colW, imgH, '우리 사진'), rightX, 0); }
+          children.push({ name:'03b_비교이미지', canvas: rowCanvas, top: Math.round(top), left:0, bottom: Math.round(top+imgH), right: WIDTH });
+          top += imgH + GAP;
+        }
         if(sec.kind === 'image'){
           const h = Math.round(WIDTH * 3/4); // 4:3 비율 (사이트와 동일)
           const canvas = psdMakeImagePlaceholder(WIDTH, h, sec.label);
