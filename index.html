@@ -203,6 +203,13 @@
   .rec-item .rc-copy{ flex-shrink:0; font-family:inherit; font-size:10.5px; background:none; border:1px solid var(--line); border-radius:4px; padding:3px 8px; cursor:pointer; color:var(--sage); }
   .rec-item .rc-copy:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
   .rec-item .rc-copy.copied{ background:var(--good); color:#fff; border-color:var(--good); }
+
+  .order-sug-item{ display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-bottom:8px; }
+  .order-sug-item .os-text{ flex:1; font-size:12.5px; color:var(--ink); line-height:1.6; }
+  .order-sug-item .os-text b{ color:var(--forest); }
+  .order-sug-item .os-apply{ flex-shrink:0; font-family:inherit; font-size:11px; font-weight:600; background:var(--forest); color:#fff; border:none; border-radius:5px; padding:6px 12px; cursor:pointer; }
+  .order-sug-item .os-apply:hover{ background:var(--forest-light); }
+  .order-sug-item .os-apply.applied{ background:var(--good); cursor:default; }
   .disc-table tr{ border-bottom:1px solid var(--line); }
   .disc-table td{ padding:9px 10px; vertical-align:top; }
   .disc-table td:first-child{ width:130px; color:var(--sage); font-weight:600; background:rgba(122,132,113,0.06); }
@@ -480,34 +487,34 @@
               <button class="export-btn" id="d-pngBtn">🖼 이미지로 저장 (PNG)</button>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-badges">
               <div class="block-label">01 · 신뢰 배지 <button class="regen-btn" data-key="badges" title="다시 생성">🔄</button></div>
               <div class="badge-strip" id="d-badges"></div>
               <div class="rank-line" id="d-rankLine"></div>
             </div>
 
-            <div class="block hook">
+            <div class="block hook" id="d-block-hook">
               <div class="block-label">02 · Hook <button class="regen-btn" data-key="hook" title="다시 생성">🔄</button></div>
               <h2 id="d-outHeadline"></h2>
               <div class="hook-answer" id="d-hookAnswer"></div>
               <span class="guarantee-tag" id="d-guaranteeTag"></span>
             </div>
 
-            <div class="block selling">
+            <div class="block selling" id="d-block-selling">
               <div class="block-label">02b · 핵심 셀링포인트 <button class="regen-btn" data-key="selling" title="다시 생성">🔄</button></div>
               <div class="main-selling-item" id="d-mainSellingItem" style="display:none;"></div>
               <div class="selling-list" id="d-sellingList"></div>
             </div>
 
-            <div class="block"><div class="img-placeholder" id="d-closeupImgBox">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div></div>
+            <div class="block" id="d-block-closeup"><div class="img-placeholder" id="d-closeupImgBox">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div></div>
 
-            <div class="block story">
+            <div class="block story" id="d-block-story">
               <div class="block-label">03 · 선별 기준 <button class="regen-btn" data-key="story" title="다시 생성">🔄</button></div>
               <h3>비교할수록 차이가 보입니다</h3>
               <div id="d-outStory" class="story-points"></div>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-compare">
               <div class="block-label">04 · 비교 <button class="regen-btn" data-key="compare" title="다시 생성">🔄</button></div>
               <div class="compare-img-row" id="d-compareImgRow"></div>
               <div class="compare-grid">
@@ -522,53 +529,58 @@
               </div>
             </div>
 
-            <div class="block process">
+            <div class="block process" id="d-block-process">
               <div class="block-label">05 · 품질 관리 <button class="regen-btn" data-key="process" title="다시 생성">🔄</button></div>
               <h3 id="d-processTitle"></h3>
               <p id="d-processBody"></p>
             </div>
 
-            <div class="block"><div class="img-placeholder" id="d-weightImgBox">📷 저울/중량 측정 사진 자리</div></div>
+            <div class="block" id="d-block-weight"><div class="img-placeholder" id="d-weightImgBox">📷 저울/중량 측정 사진 자리</div></div>
 
-            <div class="block">
+            <div class="block" id="d-block-safety">
               <div class="block-label">06 · 안전성 검사</div>
               <div class="safety-grid" id="d-safetyGrid"></div>
             </div>
 
-            <div class="block social">
+            <div class="block social" id="d-block-social">
               <div class="block-label">07 · 후기 <button class="regen-btn" data-key="social" title="다시 생성">🔄</button></div>
               <h3 id="d-socialHeadline"></h3>
               <div id="d-socialBody"></div>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-guarantee">
               <div class="block-label">08 · 책임보상 <button class="regen-btn" data-key="guarantee" title="다시 생성">🔄</button></div>
               <div class="guarantee-grid" id="d-guaranteeGrid"></div>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-options">
               <div class="block-label">09 · 상품 옵션</div>
               <div class="option-list" id="d-optionList"></div>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-faq">
               <div class="block-label">10 · Q&A <button class="regen-btn" data-key="faq" title="다시 생성">🔄</button></div>
               <div id="d-faqList"></div>
             </div>
 
-            <div class="block">
+            <div class="block" id="d-block-final">
               <div class="block-label">11 · 상품 안내 <button class="regen-btn" data-key="final" title="다시 생성">🔄</button></div>
               <p class="final-note" id="d-finalNote"></p>
             </div>
 
-            <div class="block" id="d-discBlock" style="display:none;">
+            <div class="block" id="d-discBlock" style="display:none;" data-blockid="d-block-disc">
               <div class="block-label">12 · 상품정보제공고시</div>
               <table class="disc-table" id="d-discTable"></table>
             </div>
 
-            <div class="block recommend-block">
+            <div class="block recommend-block" id="d-block-recommend">
               <div class="block-label">13 · 추천 카피 모음 <span class="hint" style="text-transform:none;letter-spacing:0;">디자이너 참고용, 실제 페이지에는 노출 안 됨</span> <button class="regen-btn" data-key="recommend" title="다시 생성">🔄</button></div>
               <div id="d-recommendList"></div>
+            </div>
+
+            <div class="block recommend-block" id="d-block-orderSuggest">
+              <div class="block-label">14 · 섹션 순서 제안 <span class="hint" style="text-transform:none;letter-spacing:0;">디자이너 참고용, 실제 페이지에는 노출 안 됨</span> <button class="regen-btn" data-key="ordersuggest" title="다시 생성">🔄</button></div>
+              <div id="d-orderSuggestList"></div>
             </div>
 
           </div>
@@ -622,7 +634,7 @@
     const response = await fetch("/api/generate", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ prompt, max_tokens: 3500 })
+      body: JSON.stringify({ prompt, max_tokens: 3800 })
     });
     const data = await response.json();
     if(!response.ok){ throw new Error(data.error || ('요청 실패 (status '+response.status+')')); }
@@ -773,6 +785,31 @@
       if(next && next.classList.contains('block')) blockEl.parentNode.insertBefore(next, blockEl);
     }
   }
+  // 섹션 순서 추천 기능에서 쓰는, 고정된 섹션 키 ↔ 실제 DOM 블록 ID 매핑
+  const SECTION_KEY_MAP = {
+    badges: { id:'d-block-badges', label:'01 · 신뢰 배지' },
+    hook: { id:'d-block-hook', label:'02 · HOOK' },
+    selling: { id:'d-block-selling', label:'02b · 핵심 셀링포인트' },
+    closeup_img: { id:'d-block-closeup', label:'제품 클로즈업 사진' },
+    story: { id:'d-block-story', label:'03 · 선별 기준' },
+    compare: { id:'d-block-compare', label:'04 · 비교' },
+    process: { id:'d-block-process', label:'05 · 품질 관리' },
+    weight_img: { id:'d-block-weight', label:'저울/중량 측정 사진' },
+    safety: { id:'d-block-safety', label:'06 · 안전성 검사' },
+    social: { id:'d-block-social', label:'07 · 후기' },
+    guarantee: { id:'d-block-guarantee', label:'08 · 책임보상' },
+    options: { id:'d-block-options', label:'09 · 상품 옵션' },
+    faq: { id:'d-block-faq', label:'10 · Q&A' },
+    final: { id:'d-block-final', label:'11 · 상품 안내' },
+  };
+  function moveBlockAfter(sourceKey, targetKey){
+    const src = SECTION_KEY_MAP[sourceKey], tgt = SECTION_KEY_MAP[targetKey];
+    if(!src || !tgt) return false;
+    const srcEl = document.getElementById(src.id), tgtEl = document.getElementById(tgt.id);
+    if(!srcEl || !tgtEl) return false;
+    tgtEl.after(srcEl);
+    return true;
+  }
   function applyBlockFontDelta(blockEl, delta){
     blockEl.querySelectorAll(BLOCK_TEXT_SELECTOR).forEach(el=>{
       const cur = parseFloat(getComputedStyle(el).fontSize) || 14;
@@ -914,6 +951,25 @@
       });
     });
   }
+  function renderOrderSuggest(suggestions){
+    const list = document.getElementById('d-orderSuggestList');
+    const valid = (suggestions||[]).filter(s=> SECTION_KEY_MAP[s.section] && SECTION_KEY_MAP[s.move_after]);
+    if(!valid.length){
+      list.innerHTML = `<div class="order-sug-item"><span class="os-text">지금 순서가 이미 자연스러워서 특별히 바꿀 걸 추천하지 않아요.</span></div>`;
+      return;
+    }
+    list.innerHTML = valid.map((s,i)=>{
+      const secLabel = SECTION_KEY_MAP[s.section].label;
+      const afterLabel = SECTION_KEY_MAP[s.move_after].label;
+      return `<div class="order-sug-item" data-idx="${i}"><span class="os-text"><b>${secLabel}</b>을(를) <b>${afterLabel}</b> 바로 다음으로 — ${s.reason||''}</span><button type="button" class="os-apply" data-section="${s.section}" data-after="${s.move_after}">적용</button></div>`;
+    }).join('');
+    list.querySelectorAll('.os-apply').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const ok = moveBlockAfter(btn.dataset.section, btn.dataset.after);
+        if(ok){ btn.textContent = '✓ 적용됨'; btn.classList.add('applied'); btn.disabled = true; }
+      });
+    });
+  }
 
 
   const dBtn = document.getElementById('d-runBtn');
@@ -956,11 +1012,15 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
 일반 셀포(쉼표로 구분, 메인 셀포 다음에 배치): ${inp.sellingRaw||'미기재'}`;
   }
   const HOOK_RULES = `후킹력을 높이기 위해 아래 기법들을 적극 활용해:
+- 중요: HOOK(headline/hook_story), 셀링포인트(selling_points), 선별기준(story_points)은 같은 입력 정보를 다루지만 절대 같은 말을 반복하면 안 돼. 아래처럼 역할을 뚜렷하게 나눠서 써:
+  · HOOK(headline/hook_story) = 감정적으로 훅을 거는 짧은 도입부. 디테일한 수치나 과정은 아직 풀지 말고 궁금증만 자극해.
+  · 셀링포인트(selling_points) = 한눈에 훑는 핵심 요약. 각 포인트를 한 문장으로 간결하게.
+  · 선별기준(story_points) = 가장 구체적인 근거 제시 단계. 여기서 처음으로 실제 수치·기준·검증 절차·단계별 프로세스 같은 "디테일"을 풀어써. HOOK이나 셀링포인트에서 이미 쓴 표현을 그대로 재사용하지 마.
 - headline: 반드시 "메인 셀포" 입력 내용을 소재로 만들어. 다른 정보(선별기준, 강점 등)를 소재로 쓰지 마. 만약 "메인 셀포"가 미기재라면 "일반 판매자 대비 강점"을 대신 소재로 쓰고, main_selling 필드는 null로 응답해.
 - headline 형식을 다양하게 써. "~한 경험 있으신가요?" 패턴만 반복하지 말고, 아래처럼 다양한 방식을 상황에 맞게 섞어서 써: 단정적 문제제기("자잘한 새우, 이제 그만 드세요"), 대비형("작은 게 아니라 큰 걸 드셔야 하는 이유"), 숫자 활용형, 대화체 등. 매번 같은 패턴을 쓰지 않도록 신경써.
-- hook_story: headline 바로 아래 오는 2~3문단 설명이야. 아래 흐름으로 스토리텔링하듯 써: (1문단) 왜 그런 문제/아쉬움이 일반적으로 생기는지 원인이나 배경 설명 → (2문단) "하지만 우리는" 식으로 메인 셀포 내용을 근거로 어떻게 다르게 하는지 설명 → (3문단, 선택) 그래서 어떤 상품을 소개하는지로 자연스럽게 마무리. 각 문단은 40~70자 내외로, 담백하고 진솔한 톤으로 써.
+- hook_story: headline 바로 아래 오는 2~3문단 설명이야. 아래 흐름으로 스토리텔링하듯 써: (1문단) 왜 그런 문제/아쉬움이 일반적으로 생기는지 원인이나 배경 설명 → (2문단) "하지만 우리는" 식으로 메인 셀포 내용을 근거로 어떻게 다르게 하는지 설명(단, 구체적 수치·과정은 선별기준 섹션에 남겨두고 여기서는 방향만 언급) → (3문단, 선택) 그래서 어떤 상품을 소개하는지로 자연스럽게 마무리. 각 문단은 40~70자 내외로, 담백하고 진솔한 톤으로 써.
 - badges: 숫자·기준이 들어간 게 있으면 우선적으로 앞에 배치 (예: "16브릭스+"처럼 구체적 수치가 신뢰를 높임).
-- story_points의 detail: "왜 이게 고객에게 이득인지"를 감각적 묘사(맛, 식감, 신선함 등)나 비교(보통 vs 우리)로 설명해서 읽는 사람이 머릿속에 그려지게 써.
+- story_points의 detail: 여기서부터 본격적으로 구체화해. "왜 이게 고객에게 이득인지"를 감각적 묘사(맛, 식감, 신선함 등)나 비교(보통 vs 우리), 그리고 실제 수치·검증 절차를 근거로 설명해서 읽는 사람이 머릿속에 그려지게 써.
 - compare_generic (일반 판매자 항목)은 특히 조심해서 써: "일반 판매자 특징"에 사용자가 직접 적은 내용이 있으면 그것만 근거로 쓰고, 없으면 절대 "우리 강점을 기계적으로 뒤집어서" 만들지 마 (예: 우리가 "항공직송"이라고 "일반 판매자는 선박으로 신선도가 떨어진다"처럼 검증 안 된 구체적 사실을 지어내면 안 돼). 대신 업계에 흔히 알려진 일반적이고 두루뭉술한 표현(예: "품질 기준이 제각각", "선별 과정 비공개", "가격 경쟁 위주")을 사용해서 근거 없는 비방처럼 보이지 않게 해.
 - compare_ours는 사용자가 입력한 "일반 판매자 대비 강점"에 있는 사실만 근거로 써.
 - social_headline, final_note: 사회적 증거(후기 수, 재구매율 등 입력에 있는 것만)와 지금 결정해야 할 이유를 자연스럽게 엮어줘.
@@ -1087,7 +1147,8 @@ ${buildContextBlock(inp)}
   "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)",
   "main_selling": {"title":"'메인 셀포' 내용을 한눈에 요약한 제목 (12자 내외)", "caption":"'메인 셀포'를 뒷받침하는 후킹 문장 (60~80자, headline/hook_story와는 다른 표현으로, 사진 옆 캡션용)"},
   "selling_points": [{"raw":"'일반 셀포' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 raw 항목의 핵심 단어를 반드시 포함한 짧은 제목 (10자 내외). 다른 셀링포인트와 헷갈릴 만큼 일반적인 문구 금지", "caption":"반드시 그 raw 항목 하나만 설명하는 후킹 문장 (60~80자). 다른 셀링포인트에도 똑같이 쓸 수 있는 두루뭉술한 문장(예: '정성껏 준비했습니다') 금지, 그 항목 고유의 내용만 다뤄야 함"}],
-  "recommended_copy": [{"category":"카테고리명", "items":["후킹 문구 후보", "후킹 문구 후보"]}]
+  "recommended_copy": [{"category":"카테고리명", "items":["후킹 문구 후보", "후킹 문구 후보"]}],
+  "order_suggestions": [{"section":"섹션키", "move_after":"섹션키", "reason":"이 순서가 나은 이유 (40자 내외)"}]
 }
 
 story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.
@@ -1099,7 +1160,9 @@ recommended_copy는 디자이너가 리디자인할 때 참고할 "후킹 문구
 3. "손실회피형" — 지금 안 사면 아쉬운 점을 자극하는 문장
 4. "감성/스토리형" — 생산 과정이나 정성을 담은 진솔한 문장
 5. "비교우위형" — 경쟁사 대비 강점을 강조하는 문장
-각 문구는 20~35자 내외로, 입력된 정보(선별기준/강점/셀포 등)에 근거해서 만들고 없는 사실은 지어내지 마. 이미 만든 headline과 겹치지 않는 새로운 표현으로 다양하게 제시해.`;
+각 문구는 20~35자 내외로, 입력된 정보(선별기준/강점/셀포 등)에 근거해서 만들고 없는 사실은 지어내지 마. 이미 만든 headline과 겹치지 않는 새로운 표현으로 다양하게 제시해.
+
+order_suggestions는 지금 입력된 정보를 근거로 "이 상품은 이렇게 순서를 바꾸면 설득력이 더 좋아질 수 있다"는 걸 0~3개 제안해. 순서를 바꿀 근거가 딱히 없으면 빈 배열([])로 응답해도 돼(억지로 만들지 마). "section"과 "move_after"는 반드시 아래 목록의 값 중 하나만 써야 해(다른 값 쓰면 안 됨): badges, hook, selling, closeup_img, story, compare, process, weight_img, safety, social, guarantee, options, faq, final. 판단 힌트: 신상품이라 후기 없음이 "예"이면 guarantee를 hook 바로 다음으로 당기는 걸 고려해봐(보상정책으로 신뢰를 먼저 확보). 판매실적/랭킹이 강하면 social을 hook 근처로 당기는 것도 고려해봐. 안전성 검사가 매우 상세하면 safety를 compare 앞으로 당기는 것도 고려해봐. 이런 힌트들을 참고하되, 실제 입력 내용에 안 맞으면 제안하지 마.`;
 
     try{
       const r = await callClaudeJSON(prompt);
@@ -1130,6 +1193,7 @@ recommended_copy는 디자이너가 리디자인할 때 참고할 "후킹 문구
       const disc = readDiscInputs();
       renderDisclosure(name, disc);
       renderRecommend(r.recommended_copy);
+      renderOrderSuggest(r.order_suggestions);
 
       // 내보내기용 데이터 저장
       lastDetailData = {
@@ -1150,7 +1214,8 @@ recommended_copy는 디자이너가 리디자인할 때 참고할 "후킹 문구
         main_selling: mainSelling ? { title: mainSelling.title||'', caption: mainSelling.caption||'', img: mainSellingImgDataUrl||null } : null,
         selling_points: sellingPoints.map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null })),
         disclosure: disc,
-        recommended_copy: r.recommended_copy||[]
+        recommended_copy: r.recommended_copy||[],
+        order_suggestions: r.order_suggestions||[]
       };
       document.getElementById('d-exportBar').style.display = 'flex';
 
@@ -1175,6 +1240,12 @@ recommended_copy는 디자이너가 리디자인할 때 참고할 "후킹 문구
       instruction: '디자이너 참고용 "추천 카피 모음"을 완전히 새로운 문구들로 다시 만들어줘. 문제제기형/숫자·근거형/손실회피형/감성·스토리형/비교우위형 5개 카테고리에 각 2~3개씩, 이전과 겹치지 않는 표현으로.',
       schema: '{"recommended_copy":[{"category":"카테고리명","items":["문구(20~35자)","문구(20~35자)"]}]}',
       apply(r){ if(!lastDetailData) return; lastDetailData.recommended_copy = r.recommended_copy||[]; renderRecommend(lastDetailData.recommended_copy); }
+    },
+    ordersuggest: {
+      label: '섹션 순서 제안',
+      instruction: '"섹션 순서 제안"을 다시 검토해서 새로 만들어줘. section/move_after는 반드시 badges, hook, selling, closeup_img, story, compare, process, weight_img, safety, social, guarantee, options, faq, final 중에서만 골라. 순서를 바꿀 근거가 없으면 빈 배열로 응답해도 돼.',
+      schema: '{"order_suggestions":[{"section":"섹션키","move_after":"섹션키","reason":"이유(40자 내외)"}]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.order_suggestions = r.order_suggestions||[]; renderOrderSuggest(lastDetailData.order_suggestions); }
     },
     selling: {
       label: '핵심 셀링포인트',
