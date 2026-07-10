@@ -117,6 +117,8 @@
   .hook h2{ font-family:'Fraunces', serif; font-weight:600; font-size:21px; line-height:1.4; margin:0 0 10px; }
   .guarantee-tag{ display:inline-block; background:rgba(232,99,44,0.1); border:1px solid rgba(232,99,44,0.35); color:var(--persimmon); font-size:11.5px; font-weight:600; padding:7px 12px; border-radius:3px; }
   .hook-answer{ font-size:14px; color:var(--sage); line-height:1.7; margin:10px 0 14px; }
+  .hook-answer p{ margin:0 0 10px; }
+  .hook-answer p:last-child{ margin-bottom:0; }
 
   /* 03 story */
   .story h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
@@ -130,6 +132,10 @@
   .compare-col .col-title{ font-size:14px; font-weight:700; margin-bottom:12px; }
   .compare-col.ours .col-title{ color:var(--harvest); }
   .compare-col ul{ margin:0; padding-left:18px; font-size:14px; line-height:2; }
+  .compare-col li[contenteditable]{ border-radius:3px; outline:none; }
+  .compare-col li[contenteditable]:hover{ background:rgba(0,0,0,0.04); }
+  .compare-col.ours li[contenteditable]:hover{ background:rgba(255,255,255,0.1); }
+  .compare-col li[contenteditable]:focus{ background:rgba(232,99,44,0.12); box-shadow:0 0 0 1px var(--persimmon); }
   .compare-col.generic ul{ list-style:'• '; }
   .compare-col.ours ul{ list-style:'• '; }
   .compare-col.generic li::marker{ color:var(--sage); }
@@ -152,6 +158,8 @@
   .compare-img-row img, .compare-img-row .img-placeholder{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:6px; }
 
   .autosave-notice{ font-size:11px; color:var(--sage); background:rgba(122,132,113,0.08); border-radius:5px; padding:8px 10px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .main-selling-field{ background:rgba(232,99,44,0.06); border:1px solid rgba(232,99,44,0.3); border-radius:6px; padding:10px 12px; }
+  .main-selling-field label{ color:var(--persimmon); }
   .autosave-notice button{ font-size:10.5px; color:var(--persimmon); background:none; border:1px solid var(--persimmon); border-radius:4px; padding:3px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .autosave-notice button:hover{ background:var(--persimmon); color:#fff; }
 
@@ -170,6 +178,12 @@
   .selling-item .simg{ width:88px; height:88px; border-radius:8px; object-fit:cover; flex-shrink:0; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 6px,#E5E0CE 6px,#E5E0CE 12px); }
   .selling-item .stext .stitle{ font-size:15px; font-weight:700; color:var(--ink); margin-bottom:4px; }
   .selling-item .stext .scap{ font-size:13px; color:var(--sage); line-height:1.6; }
+
+  .main-selling-item{ display:flex; gap:16px; align-items:center; background:rgba(232,99,44,0.06); border:1px solid rgba(232,99,44,0.25); border-radius:8px; padding:16px; margin-bottom:18px; }
+  .main-selling-item .simg{ width:104px; height:104px; border-radius:8px; object-fit:cover; flex-shrink:0; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 6px,#E5E0CE 6px,#E5E0CE 12px); }
+  .main-selling-item .stext .mstag{ font-size:10px; font-weight:700; color:var(--persimmon); letter-spacing:0.06em; margin-bottom:4px; }
+  .main-selling-item .stext .stitle{ font-size:18px; font-weight:700; color:var(--ink); margin-bottom:5px; }
+  .main-selling-item .stext .scap{ font-size:14px; color:var(--ink); line-height:1.65; }
 
   .disc-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
   .disc-table tr{ border-bottom:1px solid var(--line); }
@@ -335,6 +349,9 @@
           <div class="field"><label for="d-vs">일반 판매자 대비 강점 <span class="hint">비교표에 사용</span></label>
             <textarea id="d-vs" rows="2" placeholder="무게치기(물빼기 속임) 없음, 정량 그대로 배송, 안전성 검사 완료"></textarea>
           </div>
+          <div class="field"><label for="d-genericHints">일반 판매자 특징 <span class="hint">선택, 비워두면 AI가 일반적인 업계 관행으로만 작성</span></label>
+            <textarea id="d-genericHints" rows="2" placeholder="비워두면 근거 없는 구체적 비방 대신 일반적인 표현만 사용해요"></textarea>
+          </div>
           <div class="field">
             <label>비교 이미지 <span class="hint">선택, 비교표 위에 표시됩니다</span></label>
             <div class="img-upload-row">
@@ -385,11 +402,21 @@
           </div>
 
           <div class="panel-group-label">핵심 셀링포인트 <span class="hint">이미지+멘트 문단, 후킹용</span></div>
-          <div class="field"><label for="d-sellingPoints">셀링포인트 <span class="hint">쉼표로 구분, 2~4개</span></label>
+          <div class="field main-selling-field">
+            <label for="d-mainSelling">🔥 메인 셀포 <span class="hint">최상단 메인 후킹용, 1개</span></label>
+            <textarea id="d-mainSelling" rows="2" placeholder="예: 자잘한 새우를 큰 왕새우로만 선별해 보냄"></textarea>
+            <div class="img-upload-item" style="margin-top:6px;">
+              <span class="img-upload-label">메인 셀포 사진</span>
+              <label class="file-btn" for="d-mainSellingImg">파일 선택</label>
+              <input type="file" id="d-mainSellingImg" accept="image/*" style="display:none;">
+              <span class="file-name" id="d-mainSellingImgName">선택된 파일 없음</span>
+            </div>
+          </div>
+          <div class="field"><label for="d-sellingPoints">일반 셀포 <span class="hint">메인 다음에 배치, 쉼표로 구분, 2~3개</span></label>
             <textarea id="d-sellingPoints" rows="2" placeholder="냉장 직송, 무항생제 사육, 매일 신선포장"></textarea>
           </div>
           <div class="field" id="d-sellingImgField" style="display:none;">
-            <label>셀링포인트별 사진 <span class="hint">선택</span></label>
+            <label>일반 셀포별 사진 <span class="hint">선택</span></label>
             <div class="opt-img-upload-list" id="d-sellingImgUploads"></div>
           </div>
 
@@ -442,12 +469,13 @@
             <div class="block hook">
               <div class="block-label">02 · Hook <button class="regen-btn" data-key="hook" title="다시 생성">🔄</button></div>
               <h2 id="d-outHeadline"></h2>
-              <p class="hook-answer" id="d-hookAnswer"></p>
+              <div class="hook-answer" id="d-hookAnswer"></div>
               <span class="guarantee-tag" id="d-guaranteeTag"></span>
             </div>
 
             <div class="block selling">
               <div class="block-label">02b · 핵심 셀링포인트 <button class="regen-btn" data-key="selling" title="다시 생성">🔄</button></div>
+              <div class="main-selling-item" id="d-mainSellingItem" style="display:none;"></div>
               <div class="selling-list" id="d-sellingList"></div>
             </div>
 
@@ -586,7 +614,7 @@
   let lastDetailData = null;
   // ---------- 입력값 자동 저장 (새로고침해도 유지) ----------
   // 이 사이트는 실제로 배포된 독립 웹사이트라 localStorage를 정상적으로 사용할 수 있습니다.
-  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-rank','d-safety','d-guarantee','d-faq','d-sellingPoints','d-discType','d-discMaker','d-discLoc','d-discDate','d-discQty','d-discIngredient','d-discStorage','d-discTel'];
+  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-genericHints','d-rank','d-safety','d-guarantee','d-faq','d-mainSelling','d-sellingPoints','d-discType','d-discMaker','d-discLoc','d-discDate','d-discQty','d-discIngredient','d-discStorage','d-discTel'];
   const DETAIL_STORAGE_KEY = 'aihub_detail_form_v1';
 
   function saveDetailFormState(){
@@ -659,6 +687,8 @@
       ? `<img id="d-weightImgBox" src="${url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;">`
       : `<div class="img-placeholder" id="d-weightImgBox">📷 저울/중량 측정 사진 자리</div>`;
   });
+  let mainSellingImgDataUrl = null;
+  readImageAsDataUrl(document.getElementById('d-mainSellingImg'), document.getElementById('d-mainSellingImgName'), (url)=>{ mainSellingImgDataUrl = url; });
 
   // ---------- 옵션별 사진 업로드 (상품 옵션 입력값에 맞춰 업로드 칸이 자동으로 생김) ----------
   function parseOptionNames(){
@@ -793,7 +823,15 @@
   })();
   refreshSellingImgUploads();
 
-  function renderSelling(sellingPoints){
+  function renderSelling(mainSelling, sellingPoints){
+    const mainEl = document.getElementById('d-mainSellingItem');
+    if(mainSelling && (mainSelling.title || mainSelling.caption)){
+      mainEl.style.display = 'flex';
+      const img = mainSellingImgDataUrl || null;
+      mainEl.innerHTML = `${img?`<img class="simg" src="${img}">`:'<div class="simg"></div>'}<div class="stext"><div class="mstag">🔥 메인 셀링포인트</div><div class="stitle">${mainSelling.title||''}</div><div class="scap">${mainSelling.caption||''}</div></div>`;
+    } else {
+      mainEl.style.display = 'none'; mainEl.innerHTML = '';
+    }
     document.getElementById('d-sellingList').innerHTML = (sellingPoints||[]).map(sp=>{
       const img = sellingImgMap[sp.raw] || null;
       return `<div class="selling-item">${img?`<img class="simg" src="${img}">`:'<div class="simg"></div>'}<div class="stext"><div class="stitle">${sp.title||''}</div><div class="scap">${sp.caption||''}</div></div></div>`;
@@ -847,10 +885,12 @@
       optionsRaw: document.getElementById('d-options').value.trim(),
       selection: document.getElementById('d-selection').value.trim(),
       vs: document.getElementById('d-vs').value.trim(),
+      genericHints: document.getElementById('d-genericHints').value.trim(),
       rank: document.getElementById('d-rank').value.trim(),
       safety: document.getElementById('d-safety').value.trim(),
       guarantee: document.getElementById('d-guarantee').value.trim(),
       faqRaw: document.getElementById('d-faq').value.trim(),
+      mainSellingRaw: document.getElementById('d-mainSelling').value.trim(),
       sellingRaw: document.getElementById('d-sellingPoints').value.trim(),
     };
   }
@@ -860,20 +900,24 @@
 중량/구성: ${inp.weight||'미기재'}
 선별 기준(사용자가 줄바꿈으로 여러 항목을 적었을 수 있음): ${inp.selection||'미기재'}
 일반 판매자 대비 강점: ${inp.vs||'미기재'}
+일반 판매자 특징(사용자가 직접 적은 것, 없으면 일반적인 업계 관행만 추정): ${inp.genericHints||'미기재'}
 판매실적/랭킹: ${inp.rank||'미기재'}
 안전성 검사 항목: ${inp.safety||'미기재'}
 보상/보증 정책: ${inp.guarantee||'미기재'}
 FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
-핵심 셀링포인트(쉼표로 구분): ${inp.sellingRaw||'미기재'}`;
+메인 셀포(최상단 메인 후킹의 소재, 헤드라인은 반드시 이 내용을 기반으로 만들어야 함): ${inp.mainSellingRaw||'미기재'}
+일반 셀포(쉼표로 구분, 메인 셀포 다음에 배치): ${inp.sellingRaw||'미기재'}`;
   }
   const HOOK_RULES = `후킹력을 높이기 위해 아래 기법들을 적극 활용해:
-- headline: "그동안 왜 ~했을까요?", "~한 적 있으신가요?" 같은 공감형 질문이나, 손실회피(놓치면 아쉬운 점)를 자극하는 문장으로. 뻔한 광고 문구 대신 실제 후기·SNS에서 쓸 법한 자연스러운 구어체를 섞어도 좋아.
-- headline이 질문형이면 hook_answer가 반드시 그 질문에 대한 구체적인 답이어야 해. 질문만 던지고 답을 안 주면 안 돼 — 궁금증을 유발한 뒤 바로 풀어주는 게 후킹의 핵심이야.
+- headline: 반드시 "메인 셀포" 입력 내용을 소재로 만들어. 다른 정보(선별기준, 강점 등)를 소재로 쓰지 마. 만약 "메인 셀포"가 미기재라면 "일반 판매자 대비 강점"을 대신 소재로 쓰고, main_selling 필드는 null로 응답해.
+- headline 형식을 다양하게 써. "~한 경험 있으신가요?" 패턴만 반복하지 말고, 아래처럼 다양한 방식을 상황에 맞게 섞어서 써: 단정적 문제제기("자잘한 새우, 이제 그만 드세요"), 대비형("작은 게 아니라 큰 걸 드셔야 하는 이유"), 숫자 활용형, 대화체 등. 매번 같은 패턴을 쓰지 않도록 신경써.
+- hook_story: headline 바로 아래 오는 2~3문단 설명이야. 아래 흐름으로 스토리텔링하듯 써: (1문단) 왜 그런 문제/아쉬움이 일반적으로 생기는지 원인이나 배경 설명 → (2문단) "하지만 우리는" 식으로 메인 셀포 내용을 근거로 어떻게 다르게 하는지 설명 → (3문단, 선택) 그래서 어떤 상품을 소개하는지로 자연스럽게 마무리. 각 문단은 40~70자 내외로, 담백하고 진솔한 톤으로 써.
 - badges: 숫자·기준이 들어간 게 있으면 우선적으로 앞에 배치 (예: "16브릭스+"처럼 구체적 수치가 신뢰를 높임).
 - story_points의 detail: "왜 이게 고객에게 이득인지"를 감각적 묘사(맛, 식감, 신선함 등)나 비교(보통 vs 우리)로 설명해서 읽는 사람이 머릿속에 그려지게 써.
-- compare_generic/compare_ours: 대비가 뚜렷하게 드러나도록 같은 항목끼리 짝을 맞춰서 써 (예: 일반="기준 없이 혼합 출하" / 우리="16브릭스 이상만 선별").
+- compare_generic (일반 판매자 항목)은 특히 조심해서 써: "일반 판매자 특징"에 사용자가 직접 적은 내용이 있으면 그것만 근거로 쓰고, 없으면 절대 "우리 강점을 기계적으로 뒤집어서" 만들지 마 (예: 우리가 "항공직송"이라고 "일반 판매자는 선박으로 신선도가 떨어진다"처럼 검증 안 된 구체적 사실을 지어내면 안 돼). 대신 업계에 흔히 알려진 일반적이고 두루뭉술한 표현(예: "품질 기준이 제각각", "선별 과정 비공개", "가격 경쟁 위주")을 사용해서 근거 없는 비방처럼 보이지 않게 해.
+- compare_ours는 사용자가 입력한 "일반 판매자 대비 강점"에 있는 사실만 근거로 써.
 - social_headline, final_note: 사회적 증거(후기 수, 재구매율 등 입력에 있는 것만)와 지금 결정해야 할 이유를 자연스럽게 엮어줘.
-- selling_points: 각 항목은 반드시 그 항목 하나에만 해당하는 구체적 내용을 담아야 해. 여러 셀링포인트에 똑같이 붙여도 말이 되는 두루뭉술한 문장(예: "정성을 다했습니다", "믿고 드세요")은 절대 쓰지 마. raw 원문의 핵심 단어를 title/caption에 반드시 반영해서, 이 셀링포인트가 다른 셀링포인트와 명확히 구분되게 써.
+- selling_points: 각 항목은 반드시 그 항목 하나에만 해당하는 구체적 내용을 담아야 해. 여러 셀링포인트에 똑같이 붙여도 말이 되는 두루뭉술한 문장(예: "정성을 다했습니다", "믿고 드세요")은 절대 쓰지 마. raw 원문의 핵심 단어를 title/caption에 반드시 반영해서, 이 셀링포인트가 다른 셀링포인트와 명확히 구분되게 써. caption은 짧게 끝내지 말고 60~80자 정도로 충분히 설명해줘.
 - 전체적으로 읽는 사람이 "지금 사야겠다"는 마음이 들도록, 막연한 칭찬보다는 구체적인 근거(수치, 비교, 과정)를 통해 확신을 주는 방향으로 써. 모든 필드가 서로 같은 톤과 논리로 이어지도록(따로 노는 문장 없이) 일관성 있게 작성해.
 - 과장광고성 표현("최고", "무조건", "100% 만족" 같은 근거 없는 절대적 표현)은 피하고, 구체적 근거 기반의 설득으로 신뢰를 쌓는 톤을 유지해.`;
 
@@ -884,9 +928,9 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
   function renderRankLine(rank){
     document.getElementById('d-rankLine').textContent = rank || '';
   }
-  function renderHook(headline, guarantee_tag, hook_answer){
+  function renderHook(headline, guarantee_tag, hook_story){
     document.getElementById('d-outHeadline').textContent = headline||'';
-    document.getElementById('d-hookAnswer').textContent = hook_answer||'';
+    document.getElementById('d-hookAnswer').innerHTML = (hook_story||[]).map(p=>`<p>${p}</p>`).join('');
     document.getElementById('d-guaranteeTag').textContent = guarantee_tag||'';
   }
   function renderStory(storyPoints){
@@ -900,8 +944,17 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
       (oursImgDataUrl ? `<img src="${oursImgDataUrl}">` : `<div class="img-placeholder">📷 우리 사진 자리</div>`);
   }
   function renderCompareText(generic, ours){
-    document.getElementById('d-compareGeneric').innerHTML = (generic||[]).map(t=>`<li>${t}</li>`).join('');
-    document.getElementById('d-compareOurs').innerHTML = (ours||[]).map(t=>`<li>${t}</li>`).join('');
+    const genEl = document.getElementById('d-compareGeneric');
+    const ourEl = document.getElementById('d-compareOurs');
+    genEl.innerHTML = (generic||[]).map(t=>`<li contenteditable="true" title="클릭해서 직접 수정 가능">${t}</li>`).join('');
+    ourEl.innerHTML = (ours||[]).map(t=>`<li contenteditable="true" title="클릭해서 직접 수정 가능">${t}</li>`).join('');
+    const syncBack = ()=>{
+      if(!lastDetailData) return;
+      lastDetailData.compare_generic = Array.from(genEl.querySelectorAll('li')).map(li=>li.textContent);
+      lastDetailData.compare_ours = Array.from(ourEl.querySelectorAll('li')).map(li=>li.textContent);
+    };
+    genEl.querySelectorAll('li').forEach(li=> li.addEventListener('blur', syncBack));
+    ourEl.querySelectorAll('li').forEach(li=> li.addEventListener('blur', syncBack));
   }
   function renderProcess(title, body){
     document.getElementById('d-processTitle').textContent = title||'';
@@ -965,8 +1018,8 @@ ${buildContextBlock(inp)}
 아래 JSON 형식으로만 응답해. 다른 설명이나 코드블록 표시 없이 순수 JSON만 출력해:
 {
   "badges": ["짧은 신뢰배지 4개 (각 6자 내외)"],
-  "headline": "문제제기형 훅 헤드라인 (30자 내외, 질문형이면 반드시 hook_answer에서 그 질문에 답해줘야 해)",
-  "hook_answer": "headline이 질문이나 문제제기라면, 그 질문에 대한 답/이유를 바로 이어서 밝혀주는 문장 (50~80자). 궁금증을 던지고 바로 풀어주는 흐름으로, 입력된 선별기준/강점 정보를 근거로 구체적으로 답해줘. 절대 질문만 던지고 끝내지 마.",
+  "headline": "문제제기형 훅 헤드라인 (30자 내외, 질문형이면 반드시 hook_story에서 그 질문에 답해줘야 해)",
+  "hook_story": ["headline 아래 오는 설명 문단 1 (40~70자, 문제/배경 설명)", "설명 문단 2 (40~70자, '하지만 우리는' 식으로 메인 셀포 근거 제시)", "설명 문단 3, 선택 (40~70자, 상품 소개로 자연스럽게 마무리)"],
   "guarantee_tag": "보증 배지 한 줄 (15자 내외)",
   "story_points": [
     {"point":"'선별 기준'에서 사용자가 입력한 문장(줄바꿈 기준) 하나하나를 자연스러운 한 문장으로 다듬은 것 (35자 내외)", "detail":"그 문장을 뒷받침하는 후킹 부가설명 1~2문장 (60~90자). 왜 이 기준이 중요한지, 고객에게 어떤 이득이 되는지를 설득력 있게 풀어써줘."}
@@ -979,17 +1032,18 @@ ${buildContextBlock(inp)}
   "guarantee_items": ["'보상/보증 정책' 입력을 항목별로 나눠 각각 신뢰감 있는 한 문장으로 다듬은 것 (30자 내외씩)"],
   "faq": [{"q":"질문 그대로 다듬어서","a":"답변 (60~90자, 안심시키는 톤)"}],
   "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)",
-  "selling_points": [{"raw":"'핵심 셀링포인트' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 raw 항목의 핵심 단어를 반드시 포함한 짧은 제목 (10자 내외). 다른 셀링포인트와 헷갈릴 만큼 일반적인 문구 금지", "caption":"반드시 그 raw 항목 하나만 설명하는 후킹 문장 (40~60자). 다른 셀링포인트에도 똑같이 쓸 수 있는 두루뭉술한 문장(예: '정성껏 준비했습니다') 금지, 그 항목 고유의 내용만 다뤄야 함"}]
+  "main_selling": {"title":"'메인 셀포' 내용을 한눈에 요약한 제목 (12자 내외)", "caption":"'메인 셀포'를 뒷받침하는 후킹 문장 (60~80자, headline/hook_story와는 다른 표현으로, 사진 옆 캡션용)"},
+  "selling_points": [{"raw":"'일반 셀포' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 raw 항목의 핵심 단어를 반드시 포함한 짧은 제목 (10자 내외). 다른 셀링포인트와 헷갈릴 만큼 일반적인 문구 금지", "caption":"반드시 그 raw 항목 하나만 설명하는 후킹 문장 (60~80자). 다른 셀링포인트에도 똑같이 쓸 수 있는 두루뭉술한 문장(예: '정성껏 준비했습니다') 금지, 그 항목 고유의 내용만 다뤄야 함"}]
 }
 
 story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.
-selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 만들어. 각 항목의 "raw" 값은 반드시 사용자가 입력한 문구와 정확히 똑같아야 해(사진 매칭에 쓰여서 절대 바꾸면 안 돼).`;
+selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어(메인 셀포는 selling_points에 포함하지 말고 headline/hook_story에서만 다뤄). 각 항목의 "raw" 값은 반드시 사용자가 입력한 문구와 정확히 똑같아야 해(사진 매칭에 쓰여서 절대 바꾸면 안 돼).`;
 
     try{
       const r = await callClaudeJSON(prompt);
 
       renderBadges(r.badges); renderRankLine(rank);
-      renderHook(r.headline, r.guarantee_tag, r.hook_answer);
+      renderHook(r.headline, r.guarantee_tag, r.hook_story);
       const storyPoints = r.story_points||[];
       renderStory(storyPoints);
       renderCompareImages();
@@ -1009,7 +1063,8 @@ selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 
       renderFaq(r.faq);
       renderFinal(r.final_note);
       const sellingPoints = r.selling_points||[];
-      renderSelling(sellingPoints);
+      const mainSelling = r.main_selling||null;
+      renderSelling(mainSelling, sellingPoints);
       const disc = readDiscInputs();
       renderDisclosure(name, disc);
 
@@ -1017,7 +1072,7 @@ selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 
       lastDetailData = {
         name, origin, weight,
         badges: r.badges||[], rank,
-        headline: r.headline||'', guarantee_tag: r.guarantee_tag||'', hook_answer: r.hook_answer||'',
+        headline: r.headline||'', guarantee_tag: r.guarantee_tag||'', hook_story: r.hook_story||[],
         story_points: storyPoints,
         compare_generic: r.compare_generic||[], compare_ours: r.compare_ours||[],
         compareImgGeneric: genericImgDataUrl, compareImgOurs: oursImgDataUrl,
@@ -1029,6 +1084,7 @@ selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 
         options: optList,
         faq: r.faq||[],
         final_note: r.final_note||'',
+        main_selling: mainSelling ? { title: mainSelling.title||'', caption: mainSelling.caption||'', img: mainSellingImgDataUrl||null } : null,
         selling_points: sellingPoints.map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null })),
         disclosure: disc
       };
@@ -1052,19 +1108,21 @@ selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 
     },
     selling: {
       label: '핵심 셀링포인트',
-      instruction: '"핵심 셀링포인트" 각 항목의 title/caption을 표현을 바꿔서 새 버전으로 다시 만들어줘. raw는 입력값과 정확히 똑같이 유지해.',
-      schema: '{"selling_points":[{"raw":"입력 항목 원문 그대로","title":"...(10자 내외)","caption":"...(40~60자)"}]}',
+      instruction: '메인 셀포(main_selling)와 일반 셀포(selling_points) 각각의 title/caption을 표현을 바꿔서 새 버전으로 다시 만들어줘. raw는 입력값과 정확히 똑같이 유지해.',
+      schema: '{"main_selling":{"title":"...(12자 내외)","caption":"...(60~80자)"},"selling_points":[{"raw":"입력 항목 원문 그대로","title":"...(10자 내외)","caption":"...(60~80자)"}]}',
       apply(r){
         if(!lastDetailData) return;
         const sps = (r.selling_points||[]).map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null }));
-        lastDetailData.selling_points = sps; renderSelling(sps);
+        const ms = r.main_selling ? { title: r.main_selling.title||'', caption: r.main_selling.caption||'', img: mainSellingImgDataUrl||null } : null;
+        lastDetailData.selling_points = sps; lastDetailData.main_selling = ms;
+        renderSelling(ms, sps);
       }
     },
     hook: {
       label: 'HOOK',
-      instruction: '훅 헤드라인, 그 질문에 대한 답(hook_answer), 보증배지 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘. headline이 질문형이면 hook_answer는 반드시 그 질문에 대한 답이 되어야 해.',
-      schema: '{"headline":"문제제기형 훅 헤드라인 (30자 내외)","hook_answer":"헤드라인 질문에 대한 답/이유 (50~80자, 후킹력 있게, 궁금증을 바로 풀어주는 톤)","guarantee_tag":"보증 배지 한 줄 (15자 내외)"}',
-      apply(r){ if(!lastDetailData) return; lastDetailData.headline=r.headline||''; lastDetailData.guarantee_tag=r.guarantee_tag||''; lastDetailData.hook_answer=r.hook_answer||''; renderHook(lastDetailData.headline, lastDetailData.guarantee_tag, lastDetailData.hook_answer); }
+      instruction: '훅 헤드라인, hook_story(2~3문단 설명), 보증배지 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘. headline은 반드시 "메인 셀포" 입력 내용을 소재로 해야 하고, "~한 경험 있으신가요?" 패턴만 반복하지 말고 다양한 형식을 써.',
+      schema: '{"headline":"메인 셀포를 소재로 한 훅 헤드라인 (30자 내외)","hook_story":["설명 문단1 (40~70자)","설명 문단2 (40~70자)","설명 문단3, 선택 (40~70자)"],"guarantee_tag":"보증 배지 한 줄 (15자 내외)"}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.headline=r.headline||''; lastDetailData.guarantee_tag=r.guarantee_tag||''; lastDetailData.hook_story=r.hook_story||[]; renderHook(lastDetailData.headline, lastDetailData.guarantee_tag, lastDetailData.hook_story); }
     },
     story: {
       label: '선별 기준',
@@ -1149,10 +1207,11 @@ ${field.schema}`;
     lines.push('');
     lines.push('02. HOOK');
     lines.push(d.headline);
-    if(d.hook_answer) lines.push(d.hook_answer);
+    if(d.hook_story && d.hook_story.length) d.hook_story.forEach(p=> lines.push(p));
     if(d.guarantee_tag) lines.push(`[보증] ${d.guarantee_tag}`);
     lines.push('');
     lines.push('02b. 핵심 셀링포인트');
+    if(d.main_selling) lines.push(`  [메인] ${d.main_selling.title}: ${d.main_selling.caption}`);
     (d.selling_points||[]).forEach(sp=>{ lines.push(`  - ${sp.title}: ${sp.caption}`); });
     lines.push('');
     lines.push('03. 선별 기준 — 비교할수록 차이가 보입니다');
@@ -1420,10 +1479,11 @@ ${field.schema}`;
       const padX=50; let y=6; const layers=[];
       const h = psdBlock(d.headline||'', {fontSize:26, color:PSD_COLOR.ink, lineHeight:1.35, maxWidth:width-padX*2});
       layers.push({type:'text', name:'헤드라인', x:padX, y, block:h}); y += h.height + 10;
-      if(d.hook_answer){
-        const ans = psdBlock(d.hook_answer, {fontSize:14, lineHeight:1.6, color:PSD_COLOR.sage, maxWidth:width-padX*2});
-        layers.push({type:'text', name:'헤드라인_답변', x:padX, y, block:ans}); y += ans.height + 10;
-      }
+      (d.hook_story||[]).forEach((p,i)=>{
+        const ans = psdBlock(p, {fontSize:14, lineHeight:1.6, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+        layers.push({type:'text', name:`설명문단${i+1}`, x:padX, y, block:ans}); y += ans.height + 8;
+      });
+      y += 4;
       if(d.guarantee_tag){
         const row = psdPillRow([d.guarantee_tag], { fontSize:14, textColor:'#ffffff', bgColor:PSD_COLOR.persimmon, maxWidth:width-padX*2 });
         row.layers.forEach(l=> layers.push(Object.assign({}, l, { x:l.x+padX, y:y+l.y })));
@@ -1436,8 +1496,27 @@ ${field.schema}`;
       const label = psdBlock('02b · 핵심 셀링포인트', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
       layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 12;
 
-      const points = d.selling_points||[];
       const sellingImages = (extra && extra.sellingImages) || [];
+      const mainImg = (extra && extra.mainSellingImg) || null;
+
+      if(d.main_selling){
+        const thumbM = 104, gapM = 18;
+        const tagBlock = psdBlock('🔥 메인 셀링포인트', {fontSize:11, color:PSD_COLOR.persimmon, maxWidth:width-padX*2-thumbM-gapM});
+        const titleBlockM = psdBlock(d.main_selling.title||'', {fontSize:19, color:PSD_COLOR.ink, maxWidth:width-padX*2-thumbM-gapM});
+        const capBlockM = psdBlock(d.main_selling.caption||'', {fontSize:14, lineHeight:1.65, color:PSD_COLOR.ink, maxWidth:width-padX*2-thumbM-gapM});
+        const innerH = tagBlock.height+4+titleBlockM.height+5+capBlockM.height;
+        const cardH = Math.max(thumbM+32, innerH+32);
+        layers.push({ type:'rect', name:'메인셀포_카드배경', x:padX, y, w:width-padX*2, h:cardH, color:'#FCEFE7', radius:8 });
+        layers.push({ type:'rect', name:'메인셀포_사진', x:padX+16, y:y+(cardH-thumbM)/2, w:thumbM, h:thumbM, color:PSD_COLOR.chip, radius:8, image: mainImg });
+        const textX = padX+16+thumbM+gapM;
+        let ty = y+(cardH-innerH)/2;
+        layers.push({type:'text', name:'메인셀포_태그', x:textX, y:ty, block:tagBlock}); ty += tagBlock.height+4;
+        layers.push({type:'text', name:'메인셀포_제목', x:textX, y:ty, block:titleBlockM}); ty += titleBlockM.height+5;
+        layers.push({type:'text', name:'메인셀포_설명', x:textX, y:ty, block:capBlockM});
+        y += cardH + 20;
+      }
+
+      const points = d.selling_points||[];
       const thumb = 88, gap = 18, rowGap = 20;
       points.forEach((sp,i)=>{
         const titleBlock = psdBlock(sp.title||'', {fontSize:16, color:PSD_COLOR.ink, maxWidth:width-padX*2-thumb-gap});
@@ -1659,6 +1738,7 @@ ${field.schema}`;
       const psdUploadedImages = { closeupImg, weightImg };
       const optionImages = await Promise.all((d.options||[]).map(o=>psdLoadImage(o.img)));
       const sellingImages = await Promise.all((d.selling_points||[]).map(sp=>psdLoadImage(sp.img)));
+      const mainSellingImg = d.main_selling ? await psdLoadImage(d.main_selling.img) : null;
 
       PSD_SECTIONS.forEach(sec=>{
         if(sec.name === '04_비교'){
@@ -1689,7 +1769,7 @@ ${field.schema}`;
           top += h + GAP;
           return;
         }
-        const { height, layers } = sec.build(d, WIDTH, { optionImages, sellingImages });
+        const { height, layers } = sec.build(d, WIDTH, { optionImages, sellingImages, mainSellingImg });
         layers.forEach(l=>{
           if(l.type === 'pill' || l.type === 'rect'){
             const canvas = document.createElement('canvas');
