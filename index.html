@@ -159,6 +159,10 @@
 
   .autosave-notice{ font-size:11px; color:var(--sage); background:rgba(122,132,113,0.08); border-radius:5px; padding:8px 10px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .main-selling-field{ background:rgba(232,99,44,0.06); border:1px solid rgba(232,99,44,0.3); border-radius:6px; padding:10px 12px; }
+  .checkbox-field{ background:rgba(122,132,113,0.06); border-radius:5px; padding:9px 10px; }
+  .checkbox-label{ display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:500; color:var(--ink); cursor:pointer; }
+  .checkbox-label input[type=checkbox]{ width:14px; height:14px; cursor:pointer; accent-color:var(--persimmon); }
+  .checkbox-label .hint{ margin-left:2px; }
   .main-selling-field label{ color:var(--persimmon); }
   .autosave-notice button{ font-size:10.5px; color:var(--persimmon); background:none; border:1px solid var(--persimmon); border-radius:4px; padding:3px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .autosave-notice button:hover{ background:var(--persimmon); color:#fff; }
@@ -186,6 +190,19 @@
   .main-selling-item .stext .scap{ font-size:14px; color:var(--ink); line-height:1.65; }
 
   .disc-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .no-review-card{ display:flex; gap:12px; align-items:flex-start; background:rgba(232,99,44,0.06); border:1px solid rgba(232,99,44,0.25); border-radius:8px; padding:16px; }
+  .no-review-card .nr-badge{ flex-shrink:0; background:var(--persimmon); color:#fff; font-size:11px; font-weight:700; padding:5px 10px; border-radius:4px; }
+  .no-review-card .nr-text{ font-size:13.5px; color:var(--ink); line-height:1.7; }
+
+  .recommend-block{ background:rgba(122,132,113,0.04); }
+  .rec-category{ margin-bottom:20px; }
+  .rec-category:last-child{ margin-bottom:0; }
+  .rec-category .rc-title{ font-size:12px; font-weight:700; color:var(--forest); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .rec-category .rc-title::before{ content:''; width:4px; height:4px; border-radius:50%; background:var(--persimmon); }
+  .rec-item{ display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:6px; padding:10px 12px; margin-bottom:6px; font-size:13px; color:var(--ink); line-height:1.5; }
+  .rec-item .rc-copy{ flex-shrink:0; font-family:inherit; font-size:10.5px; background:none; border:1px solid var(--line); border-radius:4px; padding:3px 8px; cursor:pointer; color:var(--sage); }
+  .rec-item .rc-copy:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .rec-item .rc-copy.copied{ background:var(--good); color:#fff; border-color:var(--good); }
   .disc-table tr{ border-bottom:1px solid var(--line); }
   .disc-table td{ padding:9px 10px; vertical-align:top; }
   .disc-table td:first-child{ width:130px; color:var(--sage); font-weight:600; background:rgba(122,132,113,0.06); }
@@ -390,6 +407,9 @@
           <div class="panel-group-label">신뢰 요소</div>
           <div class="field"><label for="d-rank">판매실적/랭킹 <span class="hint">있는 그대로만</span></label>
             <input id="d-rank" placeholder="네이버 새우 검색 1위, 후기 7만건 이상"></div>
+          <div class="field checkbox-field">
+            <label class="checkbox-label"><input type="checkbox" id="d-noReview"> 신상품이라 아직 후기가 없어요 <span class="hint">체크하면 후기 대신 안심 멘트가 자동으로 들어가요</span></label>
+          </div>
           <div class="field"><label for="d-safety">안전성 검사 항목 <span class="hint">쉼표로 구분</span></label>
             <input id="d-safety" placeholder="기생충, 세균, 항생제, 중금속, 방사능"></div>
           <div class="field"><label for="d-guarantee">보상/보증 정책 <span class="hint">쉼표로 구분</span></label>
@@ -518,7 +538,7 @@
             <div class="block social">
               <div class="block-label">07 · 후기 <button class="regen-btn" data-key="social" title="다시 생성">🔄</button></div>
               <h3 id="d-socialHeadline"></h3>
-              <div class="review-grid" id="d-reviewGrid"></div>
+              <div id="d-socialBody"></div>
             </div>
 
             <div class="block">
@@ -544,6 +564,11 @@
             <div class="block" id="d-discBlock" style="display:none;">
               <div class="block-label">12 · 상품정보제공고시</div>
               <table class="disc-table" id="d-discTable"></table>
+            </div>
+
+            <div class="block recommend-block">
+              <div class="block-label">13 · 추천 카피 모음 <span class="hint" style="text-transform:none;letter-spacing:0;">디자이너 참고용, 실제 페이지에는 노출 안 됨</span> <button class="regen-btn" data-key="recommend" title="다시 생성">🔄</button></div>
+              <div id="d-recommendList"></div>
             </div>
 
           </div>
@@ -597,7 +622,7 @@
     const response = await fetch("/api/generate", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ prompt, max_tokens: 2800 })
+      body: JSON.stringify({ prompt, max_tokens: 3500 })
     });
     const data = await response.json();
     if(!response.ok){ throw new Error(data.error || ('요청 실패 (status '+response.status+')')); }
@@ -614,14 +639,14 @@
   let lastDetailData = null;
   // ---------- 입력값 자동 저장 (새로고침해도 유지) ----------
   // 이 사이트는 실제로 배포된 독립 웹사이트라 localStorage를 정상적으로 사용할 수 있습니다.
-  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-genericHints','d-rank','d-safety','d-guarantee','d-faq','d-mainSelling','d-sellingPoints','d-discType','d-discMaker','d-discLoc','d-discDate','d-discQty','d-discIngredient','d-discStorage','d-discTel'];
+  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-genericHints','d-rank','d-noReview','d-safety','d-guarantee','d-faq','d-mainSelling','d-sellingPoints','d-discType','d-discMaker','d-discLoc','d-discDate','d-discQty','d-discIngredient','d-discStorage','d-discTel'];
   const DETAIL_STORAGE_KEY = 'aihub_detail_form_v1';
 
   function saveDetailFormState(){
     const state = {};
     DETAIL_FORM_IDS.forEach(id=>{
       const el = document.getElementById(id);
-      if(el) state[id] = el.value;
+      if(el) state[id] = el.type === 'checkbox' ? el.checked : el.value;
     });
     try{ localStorage.setItem(DETAIL_STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   }
@@ -631,7 +656,9 @@
     if(!state) return;
     DETAIL_FORM_IDS.forEach(id=>{
       const el = document.getElementById(id);
-      if(el && state[id]) el.value = state[id];
+      if(!el) return;
+      if(el.type === 'checkbox'){ el.checked = !!state[id]; }
+      else if(state[id]){ el.value = state[id]; }
     });
   }
   function wireAutosave(){
@@ -639,7 +666,8 @@
     DETAIL_FORM_IDS.forEach(id=>{
       const el = document.getElementById(id);
       if(!el) return;
-      el.addEventListener('input', ()=>{
+      const evt = el.type === 'checkbox' ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{
         clearTimeout(saveTimer);
         saveTimer = setTimeout(saveDetailFormState, 400);
       });
@@ -653,7 +681,7 @@
     clearBtn.addEventListener('click', ()=>{
       if(!confirm('저장된 입력값을 모두 지울까요?')) return;
       try{ localStorage.removeItem(DETAIL_STORAGE_KEY); }catch(e){}
-      DETAIL_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(el) el.value=''; });
+      DETAIL_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; });
     });
   }
 
@@ -869,6 +897,23 @@
     discBlock.style.display='block';
     document.getElementById('d-discTable').innerHTML = rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
   }
+  function renderRecommend(categories){
+    const list = document.getElementById('d-recommendList');
+    list.innerHTML = (categories||[]).map(cat=>
+      `<div class="rec-category"><div class="rc-title">${cat.category||''}</div>${(cat.items||[]).map(item=>
+        `<div class="rec-item"><span class="rc-text">${item}</span><button type="button" class="rc-copy">복사</button></div>`
+      ).join('')}</div>`
+    ).join('');
+    list.querySelectorAll('.rc-copy').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const text = btn.previousElementSibling.textContent;
+        navigator.clipboard.writeText(text).then(()=>{
+          btn.textContent = '✓ 복사됨'; btn.classList.add('copied');
+          setTimeout(()=>{ btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+        });
+      });
+    });
+  }
 
 
   const dBtn = document.getElementById('d-runBtn');
@@ -887,6 +932,7 @@
       vs: document.getElementById('d-vs').value.trim(),
       genericHints: document.getElementById('d-genericHints').value.trim(),
       rank: document.getElementById('d-rank').value.trim(),
+      noReview: document.getElementById('d-noReview').checked,
       safety: document.getElementById('d-safety').value.trim(),
       guarantee: document.getElementById('d-guarantee').value.trim(),
       faqRaw: document.getElementById('d-faq').value.trim(),
@@ -902,6 +948,7 @@
 일반 판매자 대비 강점: ${inp.vs||'미기재'}
 일반 판매자 특징(사용자가 직접 적은 것, 없으면 일반적인 업계 관행만 추정): ${inp.genericHints||'미기재'}
 판매실적/랭킹: ${inp.rank||'미기재'}
+신상품이라 후기 없음: ${inp.noReview ? '예 (후기 섹션은 후기 대신 안심 멘트로 대체해줘)' : '아니오'}
 안전성 검사 항목: ${inp.safety||'미기재'}
 보상/보증 정책: ${inp.guarantee||'미기재'}
 FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
@@ -965,11 +1012,16 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
       ? safetyItems.map(s=>`<div class="safety-chip"><div class="item">${s}</div><div class="result">불검출</div></div>`).join('')
       : '<div class="safety-chip"><div class="item">검사 항목 미기재</div><div class="result">-</div></div>';
   }
-  function renderSocial(headline){
+  function renderSocial(headline, noReview, noReviewNote){
     document.getElementById('d-socialHeadline').textContent = headline||'';
-    document.getElementById('d-reviewGrid').innerHTML = [1,2,3,4].map(()=>
-      `<div class="review-card"><div class="stars">★★★★★</div><p>실제 후기 캡처/발췌 자리</p></div>`
-    ).join('');
+    const body = document.getElementById('d-socialBody');
+    if(noReview){
+      body.innerHTML = `<div class="no-review-card"><span class="nr-badge">NEW</span><p class="nr-text">${noReviewNote||''}</p></div>`;
+    } else {
+      body.innerHTML = `<div class="review-grid">${[1,2,3,4].map(()=>
+        `<div class="review-card"><div class="stars">★★★★★</div><p>실제 후기 캡처/발췌 자리</p></div>`
+      ).join('')}</div>`;
+    }
   }
   function renderGuarantee(items){
     document.getElementById('d-guaranteeGrid').innerHTML = (items||[]).length
@@ -992,7 +1044,7 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
 
   dBtn.addEventListener('click', async ()=>{
     const inp = readDetailInputs();
-    const { name, origin, weight, optionsRaw, selection, vs, rank, safety, guarantee, faqRaw } = inp;
+    const { name, origin, weight, optionsRaw, selection, vs, rank, noReview, safety, guarantee, faqRaw } = inp;
 
     if(!name){ dError.style.display='block'; dError.textContent='상품명은 최소한 입력해주세요.'; return; }
     dError.style.display='none';
@@ -1028,16 +1080,26 @@ ${buildContextBlock(inp)}
   "compare_ours": ["우리의 강점 3개 (각 12~18자, 짧고 임팩트있게 한 줄로)"],
   "process_title": "품질관리 소제목 (12자 내외, 후킹력 있게)",
   "process_body": "품질관리 설명 (100~150자). 입력된 선별기준/강점을 근거로 신뢰가 가도록 서술",
-  "social_headline": "후기/판매실적 기반 헤드라인 (20자 내외, 사회적 증거를 강조하는 훅)",
+  "social_headline": "'신상품이라 후기 없음'이 '예'이면, 후기 대신 쓸 헤드라인 (20자 내외, 예: '지금 가장 먼저 만나보세요' 스타일). '아니오'이면 후기/판매실적 기반 헤드라인 (20자 내외, 사회적 증거를 강조하는 훅)",
+  "no_review_note": "'신상품이라 후기 없음'이 '예'일 때만 작성. 후기가 아직 없는 걸 걱정하지 말라고 안심시키는 문장 (60~90자). 대신 품질관리/검수 과정이나 보상정책처럼 이미 입력된 다른 신뢰요소를 근거로 안심시켜줘. '아니오'이면 빈 문자열로.",
   "guarantee_items": ["'보상/보증 정책' 입력을 항목별로 나눠 각각 신뢰감 있는 한 문장으로 다듬은 것 (30자 내외씩)"],
   "faq": [{"q":"질문 그대로 다듬어서","a":"답변 (60~90자, 안심시키는 톤)"}],
   "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)",
   "main_selling": {"title":"'메인 셀포' 내용을 한눈에 요약한 제목 (12자 내외)", "caption":"'메인 셀포'를 뒷받침하는 후킹 문장 (60~80자, headline/hook_story와는 다른 표현으로, 사진 옆 캡션용)"},
-  "selling_points": [{"raw":"'일반 셀포' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 raw 항목의 핵심 단어를 반드시 포함한 짧은 제목 (10자 내외). 다른 셀링포인트와 헷갈릴 만큼 일반적인 문구 금지", "caption":"반드시 그 raw 항목 하나만 설명하는 후킹 문장 (60~80자). 다른 셀링포인트에도 똑같이 쓸 수 있는 두루뭉술한 문장(예: '정성껏 준비했습니다') 금지, 그 항목 고유의 내용만 다뤄야 함"}]
+  "selling_points": [{"raw":"'일반 셀포' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 raw 항목의 핵심 단어를 반드시 포함한 짧은 제목 (10자 내외). 다른 셀링포인트와 헷갈릴 만큼 일반적인 문구 금지", "caption":"반드시 그 raw 항목 하나만 설명하는 후킹 문장 (60~80자). 다른 셀링포인트에도 똑같이 쓸 수 있는 두루뭉술한 문장(예: '정성껏 준비했습니다') 금지, 그 항목 고유의 내용만 다뤄야 함"}],
+  "recommended_copy": [{"category":"카테고리명", "items":["후킹 문구 후보", "후킹 문구 후보"]}]
 }
 
 story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.
-selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어(메인 셀포는 selling_points에 포함하지 말고 headline/hook_story에서만 다뤄). 각 항목의 "raw" 값은 반드시 사용자가 입력한 문구와 정확히 똑같아야 해(사진 매칭에 쓰여서 절대 바꾸면 안 돼).`;
+selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어(메인 셀포는 selling_points에 포함하지 말고 headline/hook_story에서만 다뤄). 각 항목의 "raw" 값은 반드시 사용자가 입력한 문구와 정확히 똑같아야 해(사진 매칭에 쓰여서 절대 바꾸면 안 돼).
+
+recommended_copy는 디자이너가 리디자인할 때 참고할 "후킹 문구 후보 모음"이야(실제 페이지 본문에는 들어가지 않는 참고 자료). 아래 5개 카테고리로 각각 2~3개씩, 총 10~15개 정도 다양하게 만들어:
+1. "문제제기형" — 고객이 겪을 법한 불편/문제를 짚는 문장
+2. "숫자·근거형" — 입력된 구체적 수치·기준을 활용한 문장
+3. "손실회피형" — 지금 안 사면 아쉬운 점을 자극하는 문장
+4. "감성/스토리형" — 생산 과정이나 정성을 담은 진솔한 문장
+5. "비교우위형" — 경쟁사 대비 강점을 강조하는 문장
+각 문구는 20~35자 내외로, 입력된 정보(선별기준/강점/셀포 등)에 근거해서 만들고 없는 사실은 지어내지 마. 이미 만든 headline과 겹치지 않는 새로운 표현으로 다양하게 제시해.`;
 
     try{
       const r = await callClaudeJSON(prompt);
@@ -1051,7 +1113,7 @@ selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어
       renderProcess(r.process_title, r.process_body);
       const safetyItems = splitList(safety);
       renderSafety(safetyItems);
-      renderSocial(r.social_headline);
+      renderSocial(r.social_headline, noReview, r.no_review_note);
       const guaranteeItems = (r.guarantee_items && r.guarantee_items.length) ? r.guarantee_items : splitList(guarantee);
       renderGuarantee(guaranteeItems);
       const optList = splitList(optionsRaw).map(item=>{
@@ -1067,6 +1129,7 @@ selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어
       renderSelling(mainSelling, sellingPoints);
       const disc = readDiscInputs();
       renderDisclosure(name, disc);
+      renderRecommend(r.recommended_copy);
 
       // 내보내기용 데이터 저장
       lastDetailData = {
@@ -1079,14 +1142,15 @@ selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어
         closeupImg: closeupImgDataUrl, weightImg: weightImgDataUrl,
         process_title: r.process_title||'', process_body: r.process_body||'',
         safety: safetyItems,
-        social_headline: r.social_headline||'',
+        social_headline: r.social_headline||'', no_review: noReview, no_review_note: r.no_review_note||'',
         guarantee: guaranteeItems,
         options: optList,
         faq: r.faq||[],
         final_note: r.final_note||'',
         main_selling: mainSelling ? { title: mainSelling.title||'', caption: mainSelling.caption||'', img: mainSellingImgDataUrl||null } : null,
         selling_points: sellingPoints.map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null })),
-        disclosure: disc
+        disclosure: disc,
+        recommended_copy: r.recommended_copy||[]
       };
       document.getElementById('d-exportBar').style.display = 'flex';
 
@@ -1105,6 +1169,12 @@ selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어
       instruction: '신뢰배지 4개만 표현을 바꿔서 새 버전으로 다시 만들어줘.',
       schema: '{"badges": ["짧은 신뢰배지 4개 (각 6자 내외)"]}',
       apply(r){ if(!lastDetailData) return; lastDetailData.badges = r.badges||[]; renderBadges(lastDetailData.badges); }
+    },
+    recommend: {
+      label: '추천 카피',
+      instruction: '디자이너 참고용 "추천 카피 모음"을 완전히 새로운 문구들로 다시 만들어줘. 문제제기형/숫자·근거형/손실회피형/감성·스토리형/비교우위형 5개 카테고리에 각 2~3개씩, 이전과 겹치지 않는 표현으로.',
+      schema: '{"recommended_copy":[{"category":"카테고리명","items":["문구(20~35자)","문구(20~35자)"]}]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.recommended_copy = r.recommended_copy||[]; renderRecommend(lastDetailData.recommended_copy); }
     },
     selling: {
       label: '핵심 셀링포인트',
@@ -1144,9 +1214,14 @@ selling_points는 "일반 셀포" 입력 항목 개수만큼 정확히 만들어
     },
     social: {
       label: '후기',
-      instruction: '후기 헤드라인을 표현을 바꿔서 새 버전으로 다시 만들어줘.',
-      schema: '{"social_headline":"...(20자 내외)"}',
-      apply(r){ if(!lastDetailData) return; lastDetailData.social_headline=r.social_headline||''; renderSocial(lastDetailData.social_headline); }
+      instruction: '"신상품이라 후기 없음"이 예이면 social_headline과 no_review_note를, 아니면 social_headline만 표현을 바꿔서 새 버전으로 다시 만들어줘.',
+      schema: '{"social_headline":"...(20자 내외)","no_review_note":"신상품이라 후기 없음이 예일 때만, 안심 문구 (60~90자). 아니면 빈 문자열"}',
+      apply(r){
+        if(!lastDetailData) return;
+        lastDetailData.social_headline=r.social_headline||'';
+        if(lastDetailData.no_review) lastDetailData.no_review_note = r.no_review_note||'';
+        renderSocial(lastDetailData.social_headline, lastDetailData.no_review, lastDetailData.no_review_note);
+      }
     },
     guarantee: {
       label: '책임보상',
@@ -1235,7 +1310,7 @@ ${field.schema}`;
     lines.push('');
     lines.push('07. 후기');
     lines.push(d.social_headline);
-    lines.push('(실제 후기 캡처로 교체 필요)');
+    lines.push(d.no_review ? `(신상품 안심 멘트) ${d.no_review_note}` : '(실제 후기 캡처로 교체 필요)');
     lines.push('');
     lines.push('08. 책임보상');
     d.guarantee.forEach((g,i)=> lines.push(`  0${i+1}. ${g}`));
@@ -1257,6 +1332,14 @@ ${field.schema}`;
         rows.forEach(([k,v])=> lines.push(`  ${k}: ${v}`));
         lines.push('');
       }
+    }
+    if(d.recommended_copy && d.recommended_copy.length){
+      lines.push('13. 추천 카피 모음 (디자이너 참고용)');
+      d.recommended_copy.forEach(cat=>{
+        lines.push(`  [${cat.category}]`);
+        (cat.items||[]).forEach(item=> lines.push(`    - ${item}`));
+      });
+      lines.push('');
     }
     lines.push(`(기본정보) 원산지: ${d.origin||'-'} / 중량구성: ${d.weight||'-'}`);
     return lines.join('\n');
@@ -1607,8 +1690,13 @@ ${field.schema}`;
       layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 8;
       const h = psdBlock(d.social_headline||'', {fontSize:18, color:PSD_COLOR.ink, maxWidth:width-padX*2});
       layers.push({type:'text', name:'후기_헤드라인', x:padX, y, block:h}); y += h.height + 6;
-      const note = psdBlock('(실제 후기 캡처/발췌로 교체 필요)', {fontSize:12, color:PSD_COLOR.sage, maxWidth:width-padX*2});
-      layers.push({type:'text', name:'후기_안내', x:padX, y, block:note}); y += note.height;
+      if(d.no_review){
+        const note = psdBlock(d.no_review_note||'', {fontSize:13, lineHeight:1.65, color:PSD_COLOR.ink, maxWidth:width-padX*2});
+        layers.push({type:'text', name:'신상품_안심멘트', x:padX, y, block:note}); y += note.height;
+      } else {
+        const note = psdBlock('(실제 후기 캡처/발췌로 교체 필요)', {fontSize:12, color:PSD_COLOR.sage, maxWidth:width-padX*2});
+        layers.push({type:'text', name:'후기_안내', x:padX, y, block:note}); y += note.height;
+      }
       return { height:y+14, layers };
     }},
     { kind:'text', name:'08_책임보상', build:(d,width)=>{
@@ -1682,6 +1770,23 @@ ${field.schema}`;
         y += rowH;
       });
       return { height:y+10, layers };
+    }},
+    { kind:'text', name:'13_추천카피모음', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const cats = d.recommended_copy||[];
+      if(!cats.length) return { height:0, layers:[] };
+      const label = psdBlock('13 · 추천 카피 모음 (디자이너 참고용)', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 12;
+      cats.forEach((cat,ci)=>{
+        const catBlock = psdBlock(cat.category||'', {fontSize:13, color:PSD_COLOR.forest, maxWidth:width-padX*2});
+        layers.push({type:'text', name:`카테고리${ci+1}_제목`, x:padX, y, block:catBlock}); y += catBlock.height + 8;
+        (cat.items||[]).forEach((item,ii)=>{
+          const itemBlock = psdBlock('· '+item, {fontSize:13, lineHeight:1.6, color:PSD_COLOR.ink, maxWidth:width-padX*2-10});
+          layers.push({type:'text', name:`카테고리${ci+1}_문구${ii+1}`, x:padX+10, y, block:itemBlock}); y += itemBlock.height + 6;
+        });
+        y += 10;
+      });
+      return { height:y+6, layers };
     }},
   ];
 
