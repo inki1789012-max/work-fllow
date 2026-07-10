@@ -164,6 +164,25 @@
   .preview-toggle button{ font-family:inherit; font-size:11.5px; padding:6px 12px; border-radius:20px; border:1px solid var(--line); background:var(--white); color:var(--sage); cursor:pointer; }
   .preview-toggle button.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
 
+  .selling-list{ display:flex; flex-direction:column; gap:16px; }
+  .selling-item{ display:flex; gap:14px; align-items:center; }
+  .selling-item .simg{ width:88px; height:88px; border-radius:8px; object-fit:cover; flex-shrink:0; background:repeating-linear-gradient(135deg,#EDE9DB,#EDE9DB 6px,#E5E0CE 6px,#E5E0CE 12px); }
+  .selling-item .stext .stitle{ font-size:15px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+  .selling-item .stext .scap{ font-size:13px; color:var(--sage); line-height:1.6; }
+
+  .disc-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .disc-table tr{ border-bottom:1px solid var(--line); }
+  .disc-table td{ padding:9px 10px; vertical-align:top; }
+  .disc-table td:first-child{ width:130px; color:var(--sage); font-weight:600; background:rgba(122,132,113,0.06); }
+
+  .block-toolbar{ display:flex; align-items:center; gap:3px; margin-bottom:10px; flex-wrap:wrap; }
+  .block-toolbar button{ font-family:inherit; font-size:11px; background:var(--white); border:1px solid var(--line); border-radius:4px; padding:2px 6px; cursor:pointer; color:var(--sage); line-height:1.7; }
+  .block-toolbar button:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .block-toolbar button.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .block-toolbar .bt-sep{ width:1px; height:16px; background:var(--line); margin:0 3px; }
+  .block-toolbar input[type=color]{ width:22px; height:22px; padding:0; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:none; }
+  .block{ position:relative; }
+
   /* 05 quality process */
   .process h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 10px; }
   .process p{ font-size:13px; line-height:1.7; margin:0; }
@@ -360,6 +379,31 @@
             <textarea id="d-faq" rows="2" placeholder="더운데 신선하게 배송되나요?, 어디서 생산되나요?, 포장이 뒤집어져 있어요"></textarea>
           </div>
 
+          <div class="panel-group-label">핵심 셀링포인트 <span class="hint">이미지+멘트 문단, 후킹용</span></div>
+          <div class="field"><label for="d-sellingPoints">셀링포인트 <span class="hint">쉼표로 구분, 2~4개</span></label>
+            <textarea id="d-sellingPoints" rows="2" placeholder="냉장 직송, 무항생제 사육, 매일 신선포장"></textarea>
+          </div>
+          <div class="field" id="d-sellingImgField" style="display:none;">
+            <label>셀링포인트별 사진 <span class="hint">선택</span></label>
+            <div class="opt-img-upload-list" id="d-sellingImgUploads"></div>
+          </div>
+
+          <div class="panel-group-label">정보고시 <span class="hint">선택, 하단에 표로 표시됩니다</span></div>
+          <div class="field"><label for="d-discType">식품의 유형</label><input id="d-discType" placeholder="냉동수산물"></div>
+          <div class="row2">
+            <div class="field"><label for="d-discMaker">생산자(수입자)</label><input id="d-discMaker" placeholder="㈜대한민국농수산"></div>
+            <div class="field"><label for="d-discLoc">소재지</label><input id="d-discLoc" placeholder="전남 신안군 ○○면"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="d-discDate">제조연월일/유통기한</label><input id="d-discDate" placeholder="냉동 -18℃ 이하 12개월"></div>
+            <div class="field"><label for="d-discQty">포장단위별 중량·수량</label><input id="d-discQty" placeholder="1kg / 1개"></div>
+          </div>
+          <div class="field"><label for="d-discIngredient">원재료명 및 함량</label><input id="d-discIngredient" placeholder="흰다리새우(국내산) 100%"></div>
+          <div class="row2">
+            <div class="field"><label for="d-discStorage">보관/취급방법</label><input id="d-discStorage" placeholder="냉동보관(-18℃ 이하)"></div>
+            <div class="field"><label for="d-discTel">소비자상담 전화번호</label><input id="d-discTel" placeholder="1588-0000"></div>
+          </div>
+
           <button class="run-btn" id="d-runBtn"><span class="spinner"></span><span class="btn-text">AI로 초안 생성</span></button>
           <div class="error-box" id="d-errorBox"></div>
         </div>
@@ -394,6 +438,11 @@
               <div class="block-label">02 · Hook <button class="regen-btn" data-key="hook" title="다시 생성">🔄</button></div>
               <h2 id="d-outHeadline"></h2>
               <span class="guarantee-tag" id="d-guaranteeTag"></span>
+            </div>
+
+            <div class="block selling">
+              <div class="block-label">02b · 핵심 셀링포인트 <button class="regen-btn" data-key="selling" title="다시 생성">🔄</button></div>
+              <div class="selling-list" id="d-sellingList"></div>
             </div>
 
             <div class="block"><div class="img-placeholder" id="d-closeupImgBox">📷 / GIF 자리<br>제품 클로즈업 · 손질 과정</div></div>
@@ -458,6 +507,11 @@
               <p class="final-note" id="d-finalNote"></p>
             </div>
 
+            <div class="block" id="d-discBlock" style="display:none;">
+              <div class="block-label">12 · 상품정보제공고시</div>
+              <table class="disc-table" id="d-discTable"></table>
+            </div>
+
           </div>
         </div>
       </div>
@@ -509,7 +563,7 @@
     const response = await fetch("/api/generate", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ prompt, max_tokens: 2400 })
+      body: JSON.stringify({ prompt, max_tokens: 2800 })
     });
     const data = await response.json();
     if(!response.ok){ throw new Error(data.error || ('요청 실패 (status '+response.status+')')); }
@@ -526,7 +580,7 @@
   let lastDetailData = null;
   // ---------- 입력값 자동 저장 (새로고침해도 유지) ----------
   // 이 사이트는 실제로 배포된 독립 웹사이트라 localStorage를 정상적으로 사용할 수 있습니다.
-  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-rank','d-safety','d-guarantee','d-faq'];
+  const DETAIL_FORM_IDS = ['d-name','d-origin','d-weight','d-options','d-selection','d-vs','d-rank','d-safety','d-guarantee','d-faq','d-sellingPoints','d-discType','d-discMaker','d-discLoc','d-discDate','d-discQty','d-discIngredient','d-discStorage','d-discTel'];
   const DETAIL_STORAGE_KEY = 'aihub_detail_form_v1';
 
   function saveDetailFormState(){
@@ -643,6 +697,135 @@
     });
   });
 
+  // ---------- 블록 편집 툴바 (정렬 / 글자크기 / 굵기 / 색상 / 위치 이동) ----------
+  // 화면 미리보기와 PNG 저장(html2canvas)에는 그대로 반영됩니다. PSD는 별도 방식으로 생성되어 반영되지 않아요.
+  const BLOCK_TEXT_SELECTOR = 'h2,h3,p,li,div.point,div.detail,div.faq-q,div.faq-a,div.guarantee-item,div.opt-name,div.opt-price,div.col-title,span.guarantee-tag,div.stitle,div.scap,div.result,div.item';
+  function moveBlock(blockEl, dir){
+    if(dir === 'up'){
+      const prev = blockEl.previousElementSibling;
+      if(prev && prev.classList.contains('block')) blockEl.parentNode.insertBefore(blockEl, prev);
+    } else {
+      const next = blockEl.nextElementSibling;
+      if(next && next.classList.contains('block')) blockEl.parentNode.insertBefore(next, blockEl);
+    }
+  }
+  function applyBlockFontDelta(blockEl, delta){
+    blockEl.querySelectorAll(BLOCK_TEXT_SELECTOR).forEach(el=>{
+      const cur = parseFloat(getComputedStyle(el).fontSize) || 14;
+      el.style.fontSize = Math.max(9, cur + delta) + 'px';
+    });
+  }
+  function toggleBlockBold(blockEl){
+    const nowBold = blockEl.dataset.bold === '1';
+    blockEl.querySelectorAll(BLOCK_TEXT_SELECTOR).forEach(el=>{ el.style.fontWeight = nowBold ? '' : '700'; });
+    blockEl.dataset.bold = nowBold ? '0' : '1';
+  }
+  function applyBlockColor(blockEl, color){
+    blockEl.querySelectorAll(BLOCK_TEXT_SELECTOR).forEach(el=>{ el.style.color = color; });
+  }
+  function addBlockToolbar(blockEl){
+    if(blockEl.querySelector(':scope > .block-toolbar')) return;
+    const bar = document.createElement('div');
+    bar.className = 'block-toolbar';
+    bar.innerHTML =
+      '<button type="button" class="bt-move" data-dir="up" title="위로 이동">▲</button>' +
+      '<button type="button" class="bt-move" data-dir="down" title="아래로 이동">▼</button>' +
+      '<span class="bt-sep"></span>' +
+      '<button type="button" class="bt-align" data-align="left" title="왼쪽 정렬">⟸</button>' +
+      '<button type="button" class="bt-align" data-align="center" title="가운데 정렬">⇔</button>' +
+      '<button type="button" class="bt-align" data-align="right" title="오른쪽 정렬">⟹</button>' +
+      '<span class="bt-sep"></span>' +
+      '<button type="button" class="bt-size" data-delta="-1" title="글자 작게">A-</button>' +
+      '<button type="button" class="bt-size" data-delta="1" title="글자 크게">A+</button>' +
+      '<button type="button" class="bt-bold" title="굵게">B</button>' +
+      '<input type="color" class="bt-color" title="글자 색" value="#2d2a26">';
+    blockEl.insertBefore(bar, blockEl.firstChild);
+    bar.querySelectorAll('.bt-move').forEach(b=> b.addEventListener('click', ()=> moveBlock(blockEl, b.dataset.dir)));
+    bar.querySelectorAll('.bt-align').forEach(b=> b.addEventListener('click', ()=>{
+      blockEl.style.textAlign = b.dataset.align;
+      bar.querySelectorAll('.bt-align').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    }));
+    bar.querySelectorAll('.bt-size').forEach(b=> b.addEventListener('click', ()=> applyBlockFontDelta(blockEl, parseFloat(b.dataset.delta))));
+    bar.querySelector('.bt-bold').addEventListener('click', (e)=>{ toggleBlockBold(blockEl); e.target.classList.toggle('active'); });
+    bar.querySelector('.bt-color').addEventListener('input', (e)=> applyBlockColor(blockEl, e.target.value));
+  }
+  document.querySelectorAll('#d-page > .block').forEach(b=> addBlockToolbar(b));
+
+  // ---------- 핵심 셀링포인트 (이미지+멘트 문단) ----------
+  let sellingImgMap = {}; // { 셀링포인트명: dataUrl }
+  function parseSellingNames(){
+    return splitList(document.getElementById('d-sellingPoints').value.trim());
+  }
+  function refreshSellingImgUploads(){
+    const names = parseSellingNames();
+    const field = document.getElementById('d-sellingImgField');
+    const list = document.getElementById('d-sellingImgUploads');
+    if(!names.length){ field.style.display='none'; list.innerHTML=''; return; }
+    field.style.display='block';
+    Object.keys(sellingImgMap).forEach(k=>{ if(!names.includes(k)) delete sellingImgMap[k]; });
+    list.innerHTML = names.map((n,i)=>{
+      const inputId = `d-sellImg-${i}`;
+      const thumb = sellingImgMap[n] ? `<img class="opt-img-thumb" src="${sellingImgMap[n]}">` : `<div class="opt-img-thumb"></div>`;
+      return `<div class="opt-img-upload-item">${thumb}<span class="opt-img-name">${n}</span><label class="file-btn" for="${inputId}">사진</label><input type="file" id="${inputId}" data-sellname="${n}" accept="image/*" style="display:none;"></div>`;
+    }).join('');
+    list.querySelectorAll('input[type=file]').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const file = inp.files && inp.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ()=>{ sellingImgMap[inp.dataset.sellname] = reader.result; refreshSellingImgUploads(); };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+  (function(){
+    let t = null;
+    document.getElementById('d-sellingPoints').addEventListener('input', ()=>{
+      clearTimeout(t); t = setTimeout(refreshSellingImgUploads, 400);
+    });
+  })();
+  refreshSellingImgUploads();
+
+  function renderSelling(sellingPoints){
+    document.getElementById('d-sellingList').innerHTML = (sellingPoints||[]).map(sp=>{
+      const img = sellingImgMap[sp.raw] || null;
+      return `<div class="selling-item">${img?`<img class="simg" src="${img}">`:'<div class="simg"></div>'}<div class="stext"><div class="stitle">${sp.title||''}</div><div class="scap">${sp.caption||''}</div></div></div>`;
+    }).join('');
+  }
+
+  // ---------- 정보고시(상품정보제공고시) ----------
+  function readDiscInputs(){
+    return {
+      productName: '', // 상품명 재사용
+      type: document.getElementById('d-discType').value.trim(),
+      maker: document.getElementById('d-discMaker').value.trim(),
+      loc: document.getElementById('d-discLoc').value.trim(),
+      date: document.getElementById('d-discDate').value.trim(),
+      qty: document.getElementById('d-discQty').value.trim(),
+      ingredient: document.getElementById('d-discIngredient').value.trim(),
+      storage: document.getElementById('d-discStorage').value.trim(),
+      tel: document.getElementById('d-discTel').value.trim(),
+    };
+  }
+  function renderDisclosure(name, disc){
+    const rows = [
+      ['제품명', name],
+      ['식품의 유형', disc.type],
+      ['생산자(수입자)', disc.maker],
+      ['소재지', disc.loc],
+      ['제조연월일/유통기한', disc.date],
+      ['포장단위별 중량·수량', disc.qty],
+      ['원재료명 및 함량', disc.ingredient],
+      ['보관/취급방법', disc.storage],
+      ['소비자상담 전화번호', disc.tel],
+    ].filter(([,v])=>v);
+    const discBlock = document.getElementById('d-discBlock');
+    if(!rows.length){ discBlock.style.display='none'; return; }
+    discBlock.style.display='block';
+    document.getElementById('d-discTable').innerHTML = rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  }
+
 
   const dBtn = document.getElementById('d-runBtn');
   const dError = document.getElementById('d-errorBox');
@@ -662,6 +845,7 @@
       safety: document.getElementById('d-safety').value.trim(),
       guarantee: document.getElementById('d-guarantee').value.trim(),
       faqRaw: document.getElementById('d-faq').value.trim(),
+      sellingRaw: document.getElementById('d-sellingPoints').value.trim(),
     };
   }
   function buildContextBlock(inp){
@@ -673,7 +857,8 @@
 판매실적/랭킹: ${inp.rank||'미기재'}
 안전성 검사 항목: ${inp.safety||'미기재'}
 보상/보증 정책: ${inp.guarantee||'미기재'}
-FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}`;
+FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
+핵심 셀링포인트(쉼표로 구분): ${inp.sellingRaw||'미기재'}`;
   }
   const HOOK_RULES = `후킹력을 높이기 위해 아래 기법들을 적극 활용해:
 - headline: "그동안 왜 ~했을까요?", "~한 적 있으신가요?" 같은 공감형 질문이나, 손실회피(놓치면 아쉬운 점)를 자극하는 문장으로. 뻔한 광고 문구 대신 실제 후기·SNS에서 쓸 법한 자연스러운 구어체를 섞어도 좋아.
@@ -782,10 +967,12 @@ ${buildContextBlock(inp)}
   "social_headline": "후기/판매실적 기반 헤드라인 (20자 내외, 사회적 증거를 강조하는 훅)",
   "guarantee_items": ["'보상/보증 정책' 입력을 항목별로 나눠 각각 신뢰감 있는 한 문장으로 다듬은 것 (30자 내외씩)"],
   "faq": [{"q":"질문 그대로 다듬어서","a":"답변 (60~90자, 안심시키는 톤)"}],
-  "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)"
+  "final_note": "상품안내 마무리 문구 (80~130자, 다시 한번 구매욕을 자극하는 클로징)",
+  "selling_points": [{"raw":"'핵심 셀링포인트' 입력 항목의 원문 그대로(매칭용, 절대 바꾸지 마)", "title":"그 항목을 짧은 제목으로 다듬은 것 (10자 내외)", "caption":"그 항목을 뒷받침하는 후킹 한두 문장 (40~60자)"}]
 }
 
-story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.`;
+story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 나눈 개수만큼 만들어. 입력이 한 문장뿐이면 1개만 만들어도 돼. 입력이 없으면 "일반 판매자 대비 강점"을 근거로 2~3개 만들어.
+selling_points는 "핵심 셀링포인트" 입력 항목 개수만큼 정확히 만들어. 각 항목의 "raw" 값은 반드시 사용자가 입력한 문구와 정확히 똑같아야 해(사진 매칭에 쓰여서 절대 바꾸면 안 돼).`;
 
     try{
       const r = await callClaudeJSON(prompt);
@@ -810,6 +997,10 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       renderOptions(optList, name, weight);
       renderFaq(r.faq);
       renderFinal(r.final_note);
+      const sellingPoints = r.selling_points||[];
+      renderSelling(sellingPoints);
+      const disc = readDiscInputs();
+      renderDisclosure(name, disc);
 
       // 내보내기용 데이터 저장
       lastDetailData = {
@@ -826,7 +1017,9 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
         guarantee: guaranteeItems,
         options: optList,
         faq: r.faq||[],
-        final_note: r.final_note||''
+        final_note: r.final_note||'',
+        selling_points: sellingPoints.map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null })),
+        disclosure: disc
       };
       document.getElementById('d-exportBar').style.display = 'flex';
 
@@ -845,6 +1038,16 @@ story_points는 "선별 기준" 입력을 줄바꿈(또는 문장 단위)으로 
       instruction: '신뢰배지 4개만 표현을 바꿔서 새 버전으로 다시 만들어줘.',
       schema: '{"badges": ["짧은 신뢰배지 4개 (각 6자 내외)"]}',
       apply(r){ if(!lastDetailData) return; lastDetailData.badges = r.badges||[]; renderBadges(lastDetailData.badges); }
+    },
+    selling: {
+      label: '핵심 셀링포인트',
+      instruction: '"핵심 셀링포인트" 각 항목의 title/caption을 표현을 바꿔서 새 버전으로 다시 만들어줘. raw는 입력값과 정확히 똑같이 유지해.',
+      schema: '{"selling_points":[{"raw":"입력 항목 원문 그대로","title":"...(10자 내외)","caption":"...(40~60자)"}]}',
+      apply(r){
+        if(!lastDetailData) return;
+        const sps = (r.selling_points||[]).map(sp=>({ raw: sp.raw||'', title: sp.title||'', caption: sp.caption||'', img: sellingImgMap[sp.raw] || null }));
+        lastDetailData.selling_points = sps; renderSelling(sps);
+      }
     },
     hook: {
       label: 'HOOK',
@@ -937,6 +1140,9 @@ ${field.schema}`;
     lines.push(d.headline);
     if(d.guarantee_tag) lines.push(`[보증] ${d.guarantee_tag}`);
     lines.push('');
+    lines.push('02b. 핵심 셀링포인트');
+    (d.selling_points||[]).forEach(sp=>{ lines.push(`  - ${sp.title}: ${sp.caption}`); });
+    lines.push('');
     lines.push('03. 선별 기준 — 비교할수록 차이가 보입니다');
     (d.story_points||[]).forEach((p,i)=>{
       lines.push(`  0${i+1}. ${p.point||''}`);
@@ -972,6 +1178,15 @@ ${field.schema}`;
     lines.push('11. 상품 안내');
     lines.push(d.final_note);
     lines.push('');
+    if(d.disclosure){
+      const disc = d.disclosure;
+      const rows = [['제품명',d.name],['식품의 유형',disc.type],['생산자(수입자)',disc.maker],['소재지',disc.loc],['제조연월일/유통기한',disc.date],['포장단위별 중량·수량',disc.qty],['원재료명 및 함량',disc.ingredient],['보관/취급방법',disc.storage],['소비자상담 전화번호',disc.tel]].filter(([,v])=>v);
+      if(rows.length){
+        lines.push('12. 상품정보제공고시');
+        rows.forEach(([k,v])=> lines.push(`  ${k}: ${v}`));
+        lines.push('');
+      }
+    }
     lines.push(`(기본정보) 원산지: ${d.origin||'-'} / 중량구성: ${d.weight||'-'}`);
     return lines.join('\n');
   }
@@ -1200,6 +1415,25 @@ ${field.schema}`;
       }
       return { height:y+14, layers };
     }},
+    { kind:'text', name:'02c_셀링포인트', build:(d,width,extra)=>{
+      const padX=50; let y=6; const layers=[];
+      const label = psdBlock('02b · 핵심 셀링포인트', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 12;
+
+      const points = d.selling_points||[];
+      const sellingImages = (extra && extra.sellingImages) || [];
+      const thumb = 88, gap = 18, rowGap = 20;
+      points.forEach((sp,i)=>{
+        const titleBlock = psdBlock(sp.title||'', {fontSize:16, color:PSD_COLOR.ink, maxWidth:width-padX*2-thumb-gap});
+        const capBlock = psdBlock(sp.caption||'', {fontSize:13, lineHeight:1.6, color:PSD_COLOR.sage, maxWidth:width-padX*2-thumb-gap});
+        const rowH = Math.max(thumb, titleBlock.height+6+capBlock.height);
+        layers.push({ type:'rect', name:`셀링${i+1}_사진`, x:padX, y, w:thumb, h:thumb, color:PSD_COLOR.chip, radius:8, image: sellingImages[i]||null });
+        layers.push({ type:'text', name:`셀링${i+1}_제목`, x:padX+thumb+gap, y:y+(rowH-titleBlock.height-6-capBlock.height)/2, block:titleBlock });
+        layers.push({ type:'text', name:`셀링${i+1}_설명`, x:padX+thumb+gap, y:y+(rowH-titleBlock.height-6-capBlock.height)/2+titleBlock.height+6, block:capBlock });
+        y += rowH + rowGap;
+      });
+      return { height:y+6, layers };
+    }},
     { kind:'image', name:'02b_이미지_제품클로즈업', label:'📷 제품 클로즈업 · 손질 과정 사진 자리', imgKey:'closeupImg' },
     { kind:'text', name:'03_선별기준', build:(d,width)=>{
       const padX=50; let y=6; const layers=[];
@@ -1335,6 +1569,25 @@ ${field.schema}`;
       layers.push({type:'text', name:'하단_요약', x:padX, y, block:foot}); y += foot.height;
       return { height:y+16, layers };
     }},
+    { kind:'text', name:'12_정보고시', build:(d,width)=>{
+      const padX=50; let y=6; const layers=[];
+      const disc = d.disclosure || {};
+      const rows = [['제품명',d.name],['식품의 유형',disc.type],['생산자(수입자)',disc.maker],['소재지',disc.loc],['제조연월일/유통기한',disc.date],['포장단위별 중량·수량',disc.qty],['원재료명 및 함량',disc.ingredient],['보관/취급방법',disc.storage],['소비자상담 전화번호',disc.tel]].filter(([,v])=>v);
+      if(!rows.length) return { height:0, layers:[] };
+      const label = psdBlock('12 · 상품정보제공고시', {fontSize:12, color:PSD_COLOR.persimmon, maxWidth:width-padX*2});
+      layers.push({type:'text', name:'라벨', x:padX, y, block:label}); y += label.height + 10;
+      const keyW = 170, tableW = width - padX*2;
+      rows.forEach(([k,v],i)=>{
+        const kBlock = psdBlock(k, {fontSize:12.5, color:PSD_COLOR.sage, maxWidth:keyW-16});
+        const vBlock = psdBlock(v, {fontSize:12.5, color:PSD_COLOR.ink, maxWidth:tableW-keyW-16});
+        const rowH = Math.max(kBlock.height, vBlock.height) + 18;
+        layers.push({ type:'rect', name:`고시${i+1}_배경`, x:padX, y, w:keyW, h:rowH, color:PSD_COLOR.chip, radius:0 });
+        layers.push({ type:'text', name:`고시${i+1}_key`, x:padX+10, y:y+9, block:kBlock });
+        layers.push({ type:'text', name:`고시${i+1}_value`, x:padX+keyW+10, y:y+9, block:vBlock });
+        y += rowH;
+      });
+      return { height:y+10, layers };
+    }},
   ];
 
   function psdMakeImagePlaceholder(width, height, label){
@@ -1389,6 +1642,7 @@ ${field.schema}`;
       ]);
       const psdUploadedImages = { closeupImg, weightImg };
       const optionImages = await Promise.all((d.options||[]).map(o=>psdLoadImage(o.img)));
+      const sellingImages = await Promise.all((d.selling_points||[]).map(sp=>psdLoadImage(sp.img)));
 
       PSD_SECTIONS.forEach(sec=>{
         if(sec.name === '04_비교'){
@@ -1419,7 +1673,7 @@ ${field.schema}`;
           top += h + GAP;
           return;
         }
-        const { height, layers } = sec.build(d, WIDTH, { optionImages });
+        const { height, layers } = sec.build(d, WIDTH, { optionImages, sellingImages });
         layers.forEach(l=>{
           if(l.type === 'pill' || l.type === 'rect'){
             const canvas = document.createElement('canvas');
