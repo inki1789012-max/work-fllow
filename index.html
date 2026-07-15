@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>주식회사 대한민국농수산</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
 <style>
   :root{
     --forest: #1F3A2E;
@@ -212,6 +212,11 @@
   .order-sug-item .os-apply.applied{ background:var(--good); cursor:default; }
 
   /* ---------- 톡딜 배너 생성기 ---------- */
+  .theme-picker{ display:flex; flex-direction:column; gap:6px; }
+  .theme-opt{ display:flex; align-items:center; gap:8px; font-family:inherit; font-size:12px; font-weight:500; padding:8px 10px; border-radius:6px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer; text-align:left; }
+  .theme-opt.active{ border-color:var(--forest); background:rgba(31,58,46,0.06); font-weight:700; }
+  .theme-swatch{ width:20px; height:20px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.1); }
+
   .banner-tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
   .banner-tab{ font-family:inherit; font-size:12px; font-weight:600; padding:8px 14px; border-radius:20px; border:1px solid var(--line); background:var(--white); color:var(--sage); cursor:pointer; }
   .banner-tab.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
@@ -219,39 +224,77 @@
   .banner-pane{ display:none; }
   .banner-pane.active{ display:block; }
 
-  .tokdeal{ background:var(--white); box-shadow:0 2px 14px rgba(0,0,0,0.1); overflow:hidden; position:relative; font-family:'Work Sans', sans-serif; }
-  .td-badge-row{ padding:10px 12px 0; }
-  .td-tokdeal-badge{ display:inline-block; background:var(--harvest); color:#fff; font-size:11px; font-weight:800; padding:3px 9px; border-radius:3px; letter-spacing:0.02em; }
-  .td-name{ font-size:12px; color:var(--sage); font-weight:500; }
-  .td-hookline{ font-size:13px; color:var(--ink); font-weight:600; line-height:1.4; }
-  .td-photo{ position:relative; width:100%; aspect-ratio:1/1; background:#F2F0E4; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  /* 공통 배너 컨테이너 */
+  .tokdeal{ box-shadow:0 4px 20px rgba(0,0,0,0.22); overflow:hidden; position:relative; font-family:'Work Sans', sans-serif; padding:22px 18px 20px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .td-tag{ display:inline-flex; align-items:center; gap:4px; background:#fff; color:#c0272d; font-family:'Jua',sans-serif; font-size:13px; font-weight:400; padding:6px 14px; border-radius:20px; box-shadow:0 2px 6px rgba(0,0,0,0.15); margin-bottom:10px; }
+  .td-headline{ font-family:'Black Han Sans', sans-serif; font-size:36px; line-height:1.12; letter-spacing:-0.01em; margin:2px 0 4px; word-break:keep-all; -webkit-text-stroke:1.5px rgba(0,0,0,0.15); text-shadow:2px 2px 0 rgba(0,0,0,0.12); }
+  .td-subhead{ font-family:'Black Han Sans', sans-serif; font-size:30px; color:#E8342C; -webkit-text-stroke:2.5px #fff; paint-order:stroke fill; text-shadow:2px 2px 0 rgba(0,0,0,0.18); margin-bottom:10px; line-height:1.1; }
+  .td-hookline{ font-family:'Jua', sans-serif; font-weight:400; font-size:13px; margin-bottom:8px; opacity:0.9; }
+  .td-period{ display:inline-flex; align-items:center; gap:5px; background:rgba(0,0,0,0.72); color:#fff; font-size:11.5px; font-weight:600; padding:7px 14px; border-radius:20px; margin-bottom:14px; }
+  .td-period::before{ content:'⏱'; font-size:11px; }
+
+  .td-photo-wrap{ position:relative; width:100%; margin-bottom:14px; }
+  .td-photo{ width:100%; aspect-ratio:1/1; background:rgba(255,255,255,0.4); border-radius:10px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .td-photo img{ width:100%; height:100%; object-fit:cover; }
-  .td-photo-empty{ font-size:11px; color:var(--sage); text-align:center; padding:10px; }
-  .td-price-row{ display:flex; align-items:center; gap:8px; }
-  .td-orig{ font-size:13px; color:var(--sage); text-decoration:line-through; }
-  .td-discount-badge{ background:rgba(232,99,44,0.12); color:var(--persimmon); font-size:13px; font-weight:800; padding:2px 6px; border-radius:3px; }
-  .td-deal-price{ font-size:28px; font-weight:800; color:var(--ink); line-height:1.2; }
-  .td-deal-price::after{ content:' 원'; font-size:14px; font-weight:600; color:var(--sage); }
-  .td-coupon-strip{ background:rgba(201,162,39,0.12); border:1px dashed var(--harvest); border-radius:5px; padding:7px 10px; font-size:11.5px; color:#8a6d10; font-weight:600; }
+  .td-photo-empty{ font-size:11px; color:rgba(0,0,0,0.4); text-align:center; padding:10px; font-weight:600; }
+  .td-seal{ position:absolute; bottom:-6px; right:-2px; width:74px; height:74px; border-radius:50%; background:#C0272D; color:#FFD54A; display:flex; align-items:center; justify-content:center; transform:rotate(-10deg); font-family:'Black Han Sans',sans-serif; font-size:10px; line-height:1.35; text-align:center; border:3px solid #FFD54A; box-shadow:0 3px 10px rgba(0,0,0,0.35); padding:4px; }
 
-  /* 모바일 600x800 (절반 300x400 로 그림) */
-  .tokdeal-mobile{ display:flex; flex-direction:column; }
-  .tokdeal-mobile .td-name{ padding:2px 12px 6px; }
-  .tokdeal-mobile .td-photo{ aspect-ratio:auto; height:170px; }
-  .tokdeal-mobile .td-price-row{ padding:12px 12px 0; }
-  .tokdeal-mobile .td-deal-price{ padding:2px 12px 0; }
-  .tokdeal-mobile .td-hookline{ padding:8px 12px 12px; margin-top:auto; }
+  .td-name-line{ font-family:'Work Sans',sans-serif; font-weight:700; font-size:13px; margin-bottom:10px; }
 
-  /* PC 860 x 자동 (절반 430 x 자동 으로 그림) */
-  .tokdeal-pc{ display:flex; align-items:stretch; width:430px; }
-  .tokdeal-pc .td-pc-left{ width:180px; flex-shrink:0; background:#F2F0E4; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .tokdeal-pc .td-pc-left img{ width:100%; height:100%; object-fit:cover; }
-  .tokdeal-pc .td-photo-empty{ font-size:10.5px; }
-  .tokdeal-pc .td-pc-right{ flex:1; padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
-  .tokdeal-pc .td-name{ margin-top:2px; }
-  .tokdeal-pc .td-price-row{ margin-top:4px; }
-  .tokdeal-pc .td-deal-price{ font-size:24px; }
-  .tokdeal-pc .td-coupon-strip{ margin-top:8px; }
+  /* 단일 가격 */
+  .td-price-single{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; }
+  .td-price-orig-box{ font-size:12px; font-weight:600; opacity:0.75; }
+  .td-price-orig-box s{ display:block; font-size:13px; }
+  .td-price-arrow{ font-size:16px; opacity:0.6; }
+  .td-price-deal-box{ background:linear-gradient(180deg,#FF5A4E,#D81E1E); border-radius:8px; padding:8px 16px; box-shadow:0 3px 10px rgba(216,30,30,0.4); }
+  .td-price-deal-box .td-deal-label{ display:block; font-family:'Jua',sans-serif; font-size:11px; color:#FFE7A8; }
+  .td-price-deal-box .td-deal-num{ font-family:'Black Han Sans',sans-serif; font-size:26px; color:#fff; -webkit-text-stroke:0; line-height:1.15; }
+  .td-price-deal-box .td-deal-num::after{ content:'원'; font-size:14px; font-family:'Work Sans',sans-serif; font-weight:600; margin-left:2px; }
+
+  /* 옵션 스택 카드 */
+  .td-option-list{ width:100%; display:flex; flex-direction:column; gap:10px; }
+  .td-option-card{ background:#fff; border-radius:8px; padding:12px 14px; box-shadow:0 2px 8px rgba(0,0,0,0.12); position:relative; text-align:left; }
+  .td-option-tag{ position:absolute; top:-11px; left:14px; background:#2f6844; color:#fff; font-size:10.5px; font-weight:700; padding:3px 10px; border-radius:12px; }
+  .td-option-row{ display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+  .td-option-label{ font-size:10.5px; color:#666; line-height:1.5; }
+  .td-option-label .td-option-tokdeal-tag{ display:inline-block; background:#D81E1E; color:#fff; font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:3px; margin-top:1px; }
+  .td-option-orig{ font-size:12px; color:#999; text-decoration:line-through; margin-left:6px; }
+  .td-option-deal{ font-family:'Black Han Sans',sans-serif; font-size:21px; color:#D81E1E; margin-left:auto; padding-left:8px; }
+  .td-option-deal span{ font-size:12px; font-family:'Work Sans',sans-serif; font-weight:600; color:#333; }
+
+  .td-coupon-strip{ width:100%; box-sizing:border-box; background:rgba(255,213,74,0.18); border:1.5px dashed #C9A227; border-radius:6px; padding:8px 12px; font-size:11.5px; color:#7a5d00; font-weight:700; margin-top:12px; }
+
+  /* ---- 테마: 옐로우 (과일/채소) ---- */
+  .theme-yellow{ background:radial-gradient(circle at 50% 0%, #FFF6B0 0%, #FFCF33 45%, #FFA000 100%); }
+  .theme-yellow .td-headline{ color:#3B2400; }
+  .theme-yellow .td-name-line, .theme-yellow .td-hookline{ color:#4a2f00; }
+  .theme-yellow .td-period{ background:rgba(35,20,0,0.78); }
+
+  /* ---- 테마: 레드크림 (정육/수산) ---- */
+  .theme-cream{ background:linear-gradient(180deg,#FFF3EA 0%,#FBD9C4 60%,#F7B98A 100%); }
+  .theme-cream .td-headline{ color:#2b2320; -webkit-text-stroke:1.5px #fff; }
+  .theme-cream .td-name-line, .theme-cream .td-hookline{ color:#5a3d2b; }
+  .theme-cream .td-period{ background:#B0241F; }
+
+  /* ---- 테마: 다크 (프리미엄) ---- */
+  .theme-dark{ background:linear-gradient(180deg,#161616 0%,#000 100%); }
+  .theme-dark .td-headline{ color:#FF8A3D; -webkit-text-stroke:1.5px rgba(255,255,255,0.25); text-shadow:2px 2px 0 rgba(0,0,0,0.5); }
+  .theme-dark .td-name-line{ color:#fff; }
+  .theme-dark .td-hookline{ color:#FF8A3D; }
+  .theme-dark .td-period{ background:#D81E1E; color:#fff; }
+  .theme-dark .td-tag{ background:#1a1a1a; color:#FF8A3D; border:1px solid #FF8A3D; }
+  .theme-dark .td-photo{ background:rgba(255,255,255,0.06); border:2px solid #FF8A3D; }
+  .theme-dark .td-photo-empty{ color:rgba(255,255,255,0.4); }
+
+  /* 모바일: 300x400+ 로 그림 */
+  #b-mobileBanner .td-headline{ font-size:34px; }
+  #b-mobileBanner .td-subhead{ font-size:26px; }
+  #b-mobileBanner .td-photo{ height:150px; }
+
+  /* PC: 430 x 자동 으로 그림 (내용 동일, 가로만 넓힘) */
+  .tokdeal[id^="b-pc"]{ padding:20px 26px 22px; }
+  .tokdeal[id^="b-pc"] .td-photo{ height:190px; }
+
   .disc-table tr{ border-bottom:1px solid var(--line); }
   .disc-table td{ padding:9px 10px; vertical-align:top; }
   .disc-table td:first-child{ width:130px; color:var(--sage); font-weight:600; background:rgba(122,132,113,0.06); }
@@ -663,8 +706,21 @@
       <div class="tool-layout">
         <div class="tool-panel">
 
+          <div class="panel-group-label">컬러 테마</div>
+          <div class="field">
+            <div class="theme-picker" id="b-themePicker">
+              <button type="button" class="theme-opt active" data-theme="yellow"><span class="theme-swatch" style="background:linear-gradient(180deg,#FFE066,#FFA500);"></span>옐로우 (과일·채소)</button>
+              <button type="button" class="theme-opt" data-theme="cream"><span class="theme-swatch" style="background:linear-gradient(180deg,#FDEDE3,#F7B98A);"></span>레드크림 (정육·수산)</button>
+              <button type="button" class="theme-opt" data-theme="dark"><span class="theme-swatch" style="background:linear-gradient(180deg,#2a2a2a,#000);"></span>다크 (프리미엄)</button>
+            </div>
+          </div>
+
           <div class="panel-group-label">기본 정보</div>
-          <div class="field"><label for="b-name">상품명</label><input id="b-name" placeholder="예: 전남 신안 흰다리새우 1kg"></div>
+          <div class="field"><label for="b-tag">상단 태그 <span class="hint">알약모양 문구</span></label><input id="b-tag" placeholder="딱 4일! 톡딜 빅세일"></div>
+          <div class="field"><label for="b-headline">메인 카피 <span class="hint">가장 크게 나오는 문구</span></label><input id="b-headline" placeholder="바나나"></div>
+          <div class="field"><label for="b-name">상품명 <span class="hint">옵션 카드/가격줄에 사용</span></label><input id="b-name" placeholder="예: 전남 신안 흰다리새우 1kg"></div>
+          <div class="field"><label for="b-period">할인기간</label><input id="b-period" placeholder="7/17일(금) 17시 ~ 7/20일(월) 24시"></div>
+          <div class="field"><label for="b-badge">신뢰 배지 <span class="hint">선택, 원형 씰</span></label><input id="b-badge" placeholder="맛있어서 재구매 100%"></div>
           <div class="field">
             <label>상품 사진</label>
             <div class="img-upload-item">
@@ -677,10 +733,13 @@
 
           <div class="panel-group-label">가격 · 할인</div>
           <div class="row2">
-            <div class="field"><label for="b-origPrice">정가 <span class="hint">원</span></label><input id="b-origPrice" type="number" placeholder="39900"></div>
-            <div class="field"><label for="b-dealPrice">톡딜가 <span class="hint">원</span></label><input id="b-dealPrice" type="number" placeholder="29900"></div>
+            <div class="field"><label for="b-origPrice">기본가 <span class="hint">원</span></label><input id="b-origPrice" type="number" placeholder="29900"></div>
+            <div class="field"><label for="b-dealPrice">톡딜가 <span class="hint">원</span></label><input id="b-dealPrice" type="number" placeholder="24900"></div>
           </div>
           <div class="field"><span class="hint" id="b-discountPreview">할인율은 자동으로 계산돼요</span></div>
+          <div class="field"><label for="b-priceOptions">옵션별 가격 <span class="hint">선택, 2개 이상 입력하면 카드로 쌓임. "옵션명:기본가:톡딜가" 쉼표구분</span></label>
+            <textarea id="b-priceOptions" rows="2" placeholder="1번 옵션:15900:8900, 2번 옵션:20900:13900, 3번 옵션:24900:17900"></textarea>
+          </div>
 
           <div class="panel-group-label">쿠폰 <span class="hint">PC 버전2에만 표시</span></div>
           <div class="row2">
@@ -688,11 +747,11 @@
             <div class="field"><label for="b-couponInfo">쿠폰 할인</label><input id="b-couponInfo" placeholder="5,000원 추가할인"></div>
           </div>
 
-          <div class="panel-group-label">배너 문구 <span class="hint">선택</span></div>
-          <div class="field"><label for="b-hookline">한 줄 카피</label>
-            <textarea id="b-hookline" rows="2" placeholder="지금 놓치면 아쉬운 가격"></textarea>
+          <div class="panel-group-label">배너 문구 <span class="hint">선택, 작은 부제</span></div>
+          <div class="field"><label for="b-hookline">부제 한 줄</label>
+            <textarea id="b-hookline" rows="2" placeholder="지금이 가장 싸요!"></textarea>
           </div>
-          <button class="run-btn" id="b-aiBtn" style="background:var(--sage);"><span class="btn-text">✨ AI로 문구 제안받기</span></button>
+          <button class="run-btn" id="b-aiBtn" style="background:var(--sage);"><span class="btn-text">✨ AI로 카피 세트 제안받기</span></button>
 
           <div class="autosave-notice" style="margin-top:16px;">💾 입력값은 자동 저장돼요 <button type="button" id="b-clearSavedBtn">저장값 지우기</button></div>
 
@@ -706,53 +765,14 @@
           </div>
 
           <div class="banner-preview-wrap">
-            <!-- 모바일 600x800 → 절반 크기(300x400)로 그리고 html2canvas scale:2로 캡처 -->
             <div class="banner-pane active" data-pane="mobile">
-              <div class="tokdeal tokdeal-mobile" id="b-mobileBanner" style="width:300px;height:400px;">
-                <div class="td-badge-row"><span class="td-tokdeal-badge">톡딜</span></div>
-                <div class="td-name" id="bm-name"></div>
-                <div class="td-photo"><img id="bm-img" style="display:none;"><div class="td-photo-empty" id="bm-imgEmpty">상품 사진을 올려주세요</div></div>
-                <div class="td-price-row">
-                  <span class="td-orig" id="bm-orig"></span>
-                  <span class="td-discount-badge" id="bm-discount"></span>
-                </div>
-                <div class="td-deal-price" id="bm-deal"></div>
-                <div class="td-hookline" id="bm-hook"></div>
-              </div>
+              <div class="tokdeal" id="b-mobileBanner" style="width:300px;min-height:400px;"></div>
             </div>
-
-            <!-- PC 860 → 절반 크기(430)로 그리고 scale:2로 캡처, 높이는 자동 -->
             <div class="banner-pane" data-pane="pc1">
-              <div class="tokdeal tokdeal-pc" id="b-pc1Banner" style="width:430px;">
-                <div class="td-pc-left"><img id="bp1-img" style="display:none;"><div class="td-photo-empty" id="bp1-imgEmpty">상품 사진을<br>올려주세요</div></div>
-                <div class="td-pc-right">
-                  <span class="td-tokdeal-badge">톡딜</span>
-                  <div class="td-name" id="bp1-name"></div>
-                  <div class="td-hookline" id="bp1-hook"></div>
-                  <div class="td-price-row">
-                    <span class="td-orig" id="bp1-orig"></span>
-                    <span class="td-discount-badge" id="bp1-discount"></span>
-                  </div>
-                  <div class="td-deal-price" id="bp1-deal"></div>
-                </div>
-              </div>
+              <div class="tokdeal" id="b-pc1Banner" style="width:430px;"></div>
             </div>
-
             <div class="banner-pane" data-pane="pc2">
-              <div class="tokdeal tokdeal-pc" id="b-pc2Banner" style="width:430px;">
-                <div class="td-pc-left"><img id="bp2-img" style="display:none;"><div class="td-photo-empty" id="bp2-imgEmpty">상품 사진을<br>올려주세요</div></div>
-                <div class="td-pc-right">
-                  <span class="td-tokdeal-badge">톡딜</span>
-                  <div class="td-name" id="bp2-name"></div>
-                  <div class="td-hookline" id="bp2-hook"></div>
-                  <div class="td-price-row">
-                    <span class="td-orig" id="bp2-orig"></span>
-                    <span class="td-discount-badge" id="bp2-discount"></span>
-                  </div>
-                  <div class="td-deal-price" id="bp2-deal"></div>
-                  <div class="td-coupon-strip" id="bp2-coupon" style="display:none;"></div>
-                </div>
-              </div>
+              <div class="tokdeal" id="b-pc2Banner" style="width:430px;"></div>
             </div>
           </div>
 
@@ -2206,11 +2226,12 @@ ${field.schema}`;
   // ---------- 톡딜 배너 생성기 ----------
   (function(){
     let bannerImgDataUrl = null;
+    let bannerTheme = 'yellow';
 
-    const BANNER_FORM_IDS = ['b-name','b-origPrice','b-dealPrice','b-couponName','b-couponInfo','b-hookline'];
-    const BANNER_STORAGE_KEY = 'aihub_banner_form_v1';
+    const BANNER_FORM_IDS = ['b-tag','b-headline','b-name','b-period','b-badge','b-origPrice','b-dealPrice','b-priceOptions','b-couponName','b-couponInfo','b-hookline'];
+    const BANNER_STORAGE_KEY = 'aihub_banner_form_v2';
     function saveBannerState(){
-      const state = {};
+      const state = { theme: bannerTheme };
       BANNER_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(el) state[id] = el.value; });
       try{ localStorage.setItem(BANNER_STORAGE_KEY, JSON.stringify(state)); }catch(e){}
     }
@@ -2219,8 +2240,8 @@ ${field.schema}`;
       try{ state = JSON.parse(localStorage.getItem(BANNER_STORAGE_KEY) || 'null'); }catch(e){}
       if(!state) return;
       BANNER_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(el && state[id]) el.value = state[id]; });
+      if(state.theme) setTheme(state.theme);
     }
-    restoreBannerState();
     let bSaveTimer = null;
     BANNER_FORM_IDS.forEach(id=>{
       const el = document.getElementById(id);
@@ -2238,6 +2259,16 @@ ${field.schema}`;
       renderBanner();
     });
 
+    // 테마 선택
+    function setTheme(theme){
+      bannerTheme = theme;
+      document.querySelectorAll('.theme-opt').forEach(b=> b.classList.toggle('active', b.dataset.theme===theme));
+      renderBanner();
+    }
+    document.querySelectorAll('.theme-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ setTheme(btn.dataset.theme); saveBannerState(); });
+    });
+
     // 사진 업로드
     document.getElementById('b-img').addEventListener('change', (e)=>{
       const file = e.target.files && e.target.files[0];
@@ -2253,49 +2284,102 @@ ${field.schema}`;
       if(isNaN(num)) return '';
       return num.toLocaleString('ko-KR');
     }
+    function esc(s){
+      return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // "옵션명:기본가:톡딜가" 쉼표구분 파싱
+    function parsePriceOptions(raw){
+      if(!raw || !raw.trim()) return [];
+      return raw.split(',').map(s=>s.trim()).filter(Boolean).map(item=>{
+        const parts = item.split(':').map(p=>p.trim());
+        return { label: parts[0]||'', orig: parts[1]||'', deal: parts[2]||'' };
+      });
+    }
+
+    // 배너 하나의 내부 HTML을 생성 (모바일/PC 공통 템플릿)
+    function buildBannerHTML(opts){
+      const { tag, headline, name, period, badge, imgUrl, origPrice, dealPrice, priceOptions, hookline, couponName, couponInfo, showCoupon } = opts;
+
+      const photoHTML = imgUrl
+        ? `<img src="${imgUrl}">`
+        : `<div class="td-photo-empty">상품 사진을<br>올려주세요</div>`;
+
+      const sealHTML = badge ? `<div class="td-seal">${esc(badge)}</div>` : '';
+
+      let priceHTML = '';
+      if(priceOptions && priceOptions.length >= 2){
+        priceHTML = `<div class="td-option-list">` + priceOptions.map((o,i)=>{
+          const origNum = parseInt(o.orig,10), dealNum = parseInt(o.deal,10);
+          return `<div class="td-option-card">
+            <span class="td-option-tag">${esc(o.label)||('옵션 '+(i+1))}</span>
+            <div class="td-option-row">
+              <div class="td-option-label">기본가<br><span class="td-option-tokdeal-tag">톡딜가</span>${!isNaN(origNum)?`<span class="td-option-orig">${fmtWon(origNum)}원</span>`:''}</div>
+              <div class="td-option-deal">${!isNaN(dealNum)?fmtWon(dealNum):''}<span>원</span></div>
+            </div>
+          </div>`;
+        }).join('') + `</div>`;
+      } else {
+        const origNum = parseInt(origPrice,10), dealNum = parseInt(dealPrice,10);
+        priceHTML = `<div class="td-price-single">
+          ${!isNaN(origNum) ? `<div class="td-price-orig-box">기본가<s>${fmtWon(origNum)}원</s></div><div class="td-price-arrow">→</div>` : ''}
+          <div class="td-price-deal-box"><span class="td-deal-label">톡딜가</span><span class="td-deal-num">${!isNaN(dealNum)?fmtWon(dealNum):''}</span></div>
+        </div>`;
+      }
+
+      const couponHTML = (showCoupon && (couponName || couponInfo))
+        ? `<div class="td-coupon-strip">🎟 ${esc(couponName)||'쿠폰'}${couponInfo ? ' · '+esc(couponInfo) : ''}</div>`
+        : '';
+
+      return `
+        ${tag ? `<div class="td-tag">${esc(tag)}</div>` : ''}
+        <div class="td-headline">${esc(headline)}</div>
+        <div class="td-subhead">톡딜특가!</div>
+        ${hookline ? `<div class="td-hookline">${esc(hookline)}</div>` : ''}
+        ${period ? `<div class="td-period">${esc(period)}</div>` : ''}
+        <div class="td-photo-wrap"><div class="td-photo">${photoHTML}</div>${sealHTML}</div>
+        ${name ? `<div class="td-name-line">${esc(name)}</div>` : ''}
+        ${priceHTML}
+        ${couponHTML}
+      `;
+    }
 
     function renderBanner(){
+      const tag = document.getElementById('b-tag').value.trim();
+      const headline = document.getElementById('b-headline').value.trim() || document.getElementById('b-name').value.trim() || '상품명';
       const name = document.getElementById('b-name').value.trim();
-      const orig = document.getElementById('b-origPrice').value;
-      const deal = document.getElementById('b-dealPrice').value;
+      const period = document.getElementById('b-period').value.trim();
+      const badge = document.getElementById('b-badge').value.trim();
+      const origPrice = document.getElementById('b-origPrice').value;
+      const dealPrice = document.getElementById('b-dealPrice').value;
+      const priceOptions = parsePriceOptions(document.getElementById('b-priceOptions').value);
       const couponName = document.getElementById('b-couponName').value.trim();
       const couponInfo = document.getElementById('b-couponInfo').value.trim();
-      const hook = document.getElementById('b-hookline').value.trim();
+      const hookline = document.getElementById('b-hookline').value.trim();
 
-      const origNum = parseInt(orig, 10), dealNum = parseInt(deal, 10);
-      let discountText = '';
+      const origNum = parseInt(origPrice, 10), dealNum = parseInt(dealPrice, 10);
       if(!isNaN(origNum) && !isNaN(dealNum) && origNum > 0 && dealNum > 0 && dealNum < origNum){
         const pct = Math.round((1 - dealNum/origNum) * 100);
-        discountText = `${pct}%`;
         document.getElementById('b-discountPreview').textContent = `자동 계산된 할인율: ${pct}%`;
       } else {
         document.getElementById('b-discountPreview').textContent = '할인율은 자동으로 계산돼요';
       }
 
-      const targets = [
-        { name:'bm-name', img:'bm-img', imgEmpty:'bm-imgEmpty', orig:'bm-orig', discount:'bm-discount', deal:'bm-deal', hook:'bm-hook' },
-        { name:'bp1-name', img:'bp1-img', imgEmpty:'bp1-imgEmpty', orig:'bp1-orig', discount:'bp1-discount', deal:'bp1-deal', hook:'bp1-hook' },
-        { name:'bp2-name', img:'bp2-img', imgEmpty:'bp2-imgEmpty', orig:'bp2-orig', discount:'bp2-discount', deal:'bp2-deal', hook:'bp2-hook' },
-      ];
-      targets.forEach(t=>{
-        document.getElementById(t.name).textContent = name;
-        document.getElementById(t.orig).textContent = orig ? fmtWon(orig)+'원' : '';
-        document.getElementById(t.discount).textContent = discountText;
-        document.getElementById(t.deal).textContent = deal ? fmtWon(deal) : '';
-        document.getElementById(t.hook).textContent = hook;
-        const imgEl = document.getElementById(t.img), emptyEl = document.getElementById(t.imgEmpty);
-        if(bannerImgDataUrl){ imgEl.src = bannerImgDataUrl; imgEl.style.display='block'; emptyEl.style.display='none'; }
-        else { imgEl.style.display='none'; emptyEl.style.display='block'; }
-      });
+      const base = { tag, headline, name, period, badge, imgUrl: bannerImgDataUrl, origPrice, dealPrice, priceOptions, hookline, couponName, couponInfo };
 
-      const couponEl = document.getElementById('bp2-coupon');
-      if(couponName || couponInfo){
-        couponEl.style.display = 'block';
-        couponEl.textContent = `🎟 ${couponName||'쿠폰'}${couponInfo ? ' · '+couponInfo : ''}`;
-      } else {
-        couponEl.style.display = 'none';
-      }
+      const mobileEl = document.getElementById('b-mobileBanner');
+      mobileEl.className = 'tokdeal theme-'+bannerTheme;
+      mobileEl.innerHTML = buildBannerHTML(Object.assign({}, base, { showCoupon:false }));
+
+      const pc1El = document.getElementById('b-pc1Banner');
+      pc1El.className = 'tokdeal theme-'+bannerTheme;
+      pc1El.innerHTML = buildBannerHTML(Object.assign({}, base, { showCoupon:false }));
+
+      const pc2El = document.getElementById('b-pc2Banner');
+      pc2El.className = 'tokdeal theme-'+bannerTheme;
+      pc2El.innerHTML = buildBannerHTML(Object.assign({}, base, { showCoupon:true }));
     }
+    restoreBannerState();
     renderBanner();
 
     // 탭 전환
@@ -2307,7 +2391,7 @@ ${field.schema}`;
       });
     });
 
-    // AI 문구 제안
+    // AI 카피 세트 제안 (태그/헤드라인/부제 한번에)
     document.getElementById('b-aiBtn').addEventListener('click', async ()=>{
       const btn = document.getElementById('b-aiBtn');
       const name = document.getElementById('b-name').value.trim();
@@ -2317,21 +2401,17 @@ ${field.schema}`;
       const original = btn.querySelector('.btn-text').textContent;
       btn.disabled = true; btn.querySelector('.btn-text').textContent = '생성 중...';
       try{
-        const prompt = `너는 이커머스 톡딜 배너 카피라이터야. 아래 상품의 배너에 들어갈 아주 짧은 한 줄 후킹 카피를 3개 만들어줘.
+        const prompt = `너는 이커머스 톡딜 배너 카피라이터야. 아래 상품 정보로 배너에 들어갈 카피 세트를 만들어줘.
 상품명: ${name}
-정가: ${orig||'미기재'}원
+기본가: ${orig||'미기재'}원
 톡딜가: ${deal||'미기재'}원
-조건: 각 문구는 12~18자, 과장 없이 지금 사야 할 이유를 짧고 강하게. 배너에 큰 글씨로 들어가는 문구야.
-아래 JSON 형식으로만 응답해: {"options":["문구1","문구2","문구3"]}`;
+조건: tag는 8~14자 알약모양 상단 문구(예: "딱 4일! 톡딜 빅세일"), headline은 상품명을 강조하는 2~6자의 아주 큰 대문구(예: "바나나", "1+ 한우"), hookline은 12~18자 부제.
+아래 JSON 형식으로만 응답해: {"tag":"...","headline":"...","hookline":"..."}`;
         const r = await callClaudeJSON(prompt);
-        const opts = r.options||[];
-        if(opts.length){
-          document.getElementById('b-hookline').value = opts[0];
-          renderBanner(); saveBannerState();
-          if(opts.length > 1){
-            alert('다른 후보:\n' + opts.slice(1).join('\n'));
-          }
-        }
+        if(r.tag) document.getElementById('b-tag').value = r.tag;
+        if(r.headline) document.getElementById('b-headline').value = r.headline;
+        if(r.hookline) document.getElementById('b-hookline').value = r.hookline;
+        renderBanner(); saveBannerState();
       }catch(err){
         alert('문구 생성 중 오류: ' + err.message);
       }finally{
@@ -2350,7 +2430,7 @@ ${field.schema}`;
       btn.disabled = true; btn.textContent = '이미지 만드는 중...';
       try{
         const html2canvas = await loadHtml2Canvas();
-        const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: null });
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
         const name = document.getElementById('b-name').value.trim() || '톡딜배너';
