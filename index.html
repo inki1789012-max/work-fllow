@@ -167,6 +167,19 @@
   .autosave-notice button{ font-size:10.5px; color:var(--persimmon); background:none; border:1px solid var(--persimmon); border-radius:4px; padding:3px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .autosave-notice button:hover{ background:var(--persimmon); color:#fff; }
 
+  .save-slots{ background:rgba(31,58,46,0.05); border:1px solid rgba(31,58,46,0.15); border-radius:8px; padding:12px; margin-bottom:16px; }
+  .save-slots-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .save-slots-head span{ font-size:12.5px; font-weight:700; color:var(--forest); }
+  .save-slots-head button{ font-family:inherit; font-size:11px; font-weight:600; background:var(--forest); color:#fff; border:none; border-radius:5px; padding:5px 10px; cursor:pointer; }
+  .save-slots-head button:hover{ background:var(--forest-light); }
+  .save-slots-select{ width:100%; font-family:inherit; font-size:12.5px; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--ink); margin-bottom:8px; }
+  .save-slots-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .save-slots-actions button{ font-family:inherit; font-size:11px; font-weight:600; background:var(--white); border:1px solid var(--line); border-radius:5px; padding:6px 10px; cursor:pointer; color:var(--ink); }
+  .save-slots-actions button:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .save-slots-actions button.danger{ color:var(--persimmon); border-color:rgba(232,99,44,0.4); }
+  .save-slots-actions button.danger:hover{ background:var(--persimmon); color:#fff; border-color:var(--persimmon); }
+  .save-slots-hint{ font-size:10.5px; color:var(--sage); line-height:1.5; margin-top:8px; }
+
   .opt-img-upload-list{ display:flex; flex-direction:column; gap:6px; }
   .opt-img-upload-item{ display:flex; align-items:center; gap:8px; border:1px dashed var(--line); border-radius:5px; padding:6px 8px; }
   .opt-img-upload-item .opt-img-name{ flex:1; font-size:11px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -436,7 +449,21 @@
       <div class="tool-layout">
         <div class="tool-panel">
 
-          <div class="autosave-notice">💾 입력값은 자동 저장돼요 (새로고침해도 유지) <button type="button" id="d-clearSavedBtn">저장값 지우기</button></div>
+          <div class="save-slots">
+            <div class="save-slots-head">
+              <span>💾 저장 목록</span>
+              <button type="button" id="d-saveNewBtn">+ 현재 내용 저장</button>
+            </div>
+            <select id="d-slotSelect" class="save-slots-select">
+              <option value="">저장된 항목을 선택해서 불러오기…</option>
+            </select>
+            <div class="save-slots-actions">
+              <button type="button" id="d-loadBtn">불러오기</button>
+              <button type="button" id="d-updateBtn">현재 내용으로 덮어쓰기</button>
+              <button type="button" id="d-deleteBtn" class="danger">삭제</button>
+            </div>
+            <div class="save-slots-hint">현재 입력값은 자동으로도 저장돼요 (새로고침해도 유지). 여러 상품을 오가려면 위에서 이름 붙여 저장하세요.</div>
+          </div>
 
           <div class="panel-group-label">기본 정보</div>
           <div class="field"><label for="d-name">상품명</label><input id="d-name" placeholder="예: 진남 신안 장흥도 흰다리 새우"></div>
@@ -854,14 +881,90 @@
   restoreDetailFormState();
   wireAutosave();
 
-  const clearBtn = document.getElementById('d-clearSavedBtn');
-  if(clearBtn){
-    clearBtn.addEventListener('click', ()=>{
-      if(!confirm('저장된 입력값을 모두 지울까요?')) return;
-      try{ localStorage.removeItem(DETAIL_STORAGE_KEY); }catch(e){}
-      DETAIL_FORM_IDS.forEach(id=>{ const el = document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; });
+  // ---------- 저장 목록 (이름 붙여 여러 개 저장/불러오기) ----------
+  const DETAIL_SLOTS_KEY = 'aihub_detail_slots_v1';
+  function readCurrentForm(){
+    const state = {};
+    DETAIL_FORM_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) state[id] = el.type === 'checkbox' ? el.checked : el.value;
     });
+    return state;
   }
+  function writeToForm(state){
+    if(!state) return;
+    DETAIL_FORM_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.type === 'checkbox'){ el.checked = !!state[id]; }
+      else { el.value = state[id] || ''; }
+    });
+    saveDetailFormState(); // 불러온 내용을 자동저장에도 반영
+  }
+  function loadSlots(){
+    try{ return JSON.parse(localStorage.getItem(DETAIL_SLOTS_KEY) || '{}'); }catch(e){ return {}; }
+  }
+  function persistSlots(slots){
+    try{ localStorage.setItem(DETAIL_SLOTS_KEY, JSON.stringify(slots)); }catch(e){}
+  }
+  function refreshSlotSelect(selectedName){
+    const sel = document.getElementById('d-slotSelect');
+    const slots = loadSlots();
+    const names = Object.keys(slots).sort((a,b)=> (slots[b].savedAt||0) - (slots[a].savedAt||0));
+    sel.innerHTML = '<option value="">저장된 항목을 선택해서 불러오기…</option>' +
+      names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+    if(selectedName && slots[selectedName]) sel.value = selectedName;
+  }
+  function defaultSlotName(){
+    const nameField = document.getElementById('d-name').value.trim();
+    return nameField || '';
+  }
+
+  document.getElementById('d-saveNewBtn').addEventListener('click', ()=>{
+    const suggested = defaultSlotName();
+    const name = prompt('저장할 이름을 입력하세요 (예: 김치, 신안새우)', suggested);
+    if(name === null) return;
+    const trimmed = name.trim();
+    if(!trimmed){ alert('이름을 입력해주세요.'); return; }
+    const slots = loadSlots();
+    if(slots[trimmed] && !confirm(`"${trimmed}" 이름이 이미 있어요. 덮어쓸까요?`)) return;
+    slots[trimmed] = { data: readCurrentForm(), savedAt: Date.now() };
+    persistSlots(slots);
+    refreshSlotSelect(trimmed);
+    alert(`"${trimmed}" 저장 완료!`);
+  });
+
+  document.getElementById('d-loadBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('d-slotSelect').value;
+    if(!name){ alert('불러올 항목을 먼저 선택해주세요.'); return; }
+    const slots = loadSlots();
+    if(!slots[name]){ alert('해당 항목을 찾을 수 없어요.'); return; }
+    writeToForm(slots[name].data);
+    alert(`"${name}" 불러오기 완료! (사진은 다시 올려주세요)`);
+  });
+
+  document.getElementById('d-updateBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('d-slotSelect').value;
+    if(!name){ alert('덮어쓸 항목을 먼저 선택해주세요.'); return; }
+    if(!confirm(`"${name}"을(를) 지금 입력한 내용으로 덮어쓸까요?`)) return;
+    const slots = loadSlots();
+    slots[name] = { data: readCurrentForm(), savedAt: Date.now() };
+    persistSlots(slots);
+    refreshSlotSelect(name);
+    alert(`"${name}" 업데이트 완료!`);
+  });
+
+  document.getElementById('d-deleteBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('d-slotSelect').value;
+    if(!name){ alert('삭제할 항목을 먼저 선택해주세요.'); return; }
+    if(!confirm(`"${name}"을(를) 삭제할까요?`)) return;
+    const slots = loadSlots();
+    delete slots[name];
+    persistSlots(slots);
+    refreshSlotSelect();
+  });
+
+  refreshSlotSelect();
 
   let genericImgDataUrl = null;
   let oursImgDataUrl = null;
