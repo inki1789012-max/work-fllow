@@ -217,6 +217,14 @@
   .rec-item .rc-copy:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
   .rec-item .rc-copy.copied{ background:var(--good); color:#fff; border-color:var(--good); }
 
+  .hookvar-item{ display:flex; align-items:flex-start; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:7px; padding:12px 14px; margin-bottom:8px; }
+  .hookvar-item .hv-body{ flex:1; }
+  .hookvar-item .hv-headline{ font-size:15px; font-weight:700; color:var(--ink); line-height:1.4; margin-bottom:3px; }
+  .hookvar-item .hv-sub{ font-size:12.5px; color:var(--sage); line-height:1.5; }
+  .hookvar-item .hv-copy{ flex-shrink:0; font-family:inherit; font-size:10.5px; background:none; border:1px solid var(--line); border-radius:4px; padding:4px 9px; cursor:pointer; color:var(--sage); margin-top:2px; }
+  .hookvar-item .hv-copy:hover{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .hookvar-item .hv-copy.copied{ background:var(--good); color:#fff; border-color:var(--good); }
+
   .order-sug-item{ display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-bottom:8px; }
   .order-sug-item .os-text{ flex:1; font-size:12.5px; color:var(--ink); line-height:1.6; }
   .order-sug-item .os-text b{ color:var(--forest); }
@@ -611,6 +619,11 @@
               <h2 id="d-outHeadline"></h2>
               <div class="hook-answer" id="d-hookAnswer"></div>
               <span class="guarantee-tag" id="d-guaranteeTag"></span>
+            </div>
+
+            <div class="block recommend-block" id="d-block-hookvar">
+              <div class="block-label">02-1 · 훅 헤드라인 후보 <span class="hint" style="text-transform:none;letter-spacing:0;">디자이너 참고용, 골라 쓰세요</span> <button class="regen-btn" data-key="hookvar" title="다시 생성">🔄</button></div>
+              <div id="d-hookVarList"></div>
             </div>
 
             <div class="block selling" id="d-block-selling">
@@ -1220,6 +1233,26 @@
       });
     });
   }
+  function renderHookVariations(variations){
+    const list = document.getElementById('d-hookVarList');
+    const items = variations||[];
+    if(!items.length){ list.innerHTML = '<div class="hookvar-item"><div class="hv-body"><div class="hv-sub">훅 헤드라인 후보가 아직 없어요. 재생성해보세요.</div></div></div>'; return; }
+    list.innerHTML = items.map(v=>
+      `<div class="hookvar-item"><div class="hv-body"><div class="hv-headline">${v.headline||''}</div>${v.sub?`<div class="hv-sub">${v.sub}</div>`:''}</div><button type="button" class="hv-copy">복사</button></div>`
+    ).join('');
+    list.querySelectorAll('.hv-copy').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const body = btn.previousElementSibling;
+        const headline = body.querySelector('.hv-headline')?.textContent || '';
+        const sub = body.querySelector('.hv-sub')?.textContent || '';
+        const text = sub ? `${headline}\n${sub}` : headline;
+        navigator.clipboard.writeText(text).then(()=>{
+          btn.textContent = '✓ 복사됨'; btn.classList.add('copied');
+          setTimeout(()=>{ btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+        });
+      });
+    });
+  }
   function renderOrderSuggest(suggestions){
     const list = document.getElementById('d-orderSuggestList');
     const valid = (suggestions||[]).filter(s=> SECTION_KEY_MAP[s.section] && SECTION_KEY_MAP[s.move_after]);
@@ -1287,7 +1320,8 @@ FAQ로 다룰 질문: ${inp.faqRaw||'미기재'}
   · 선별기준(story_points) = 가장 구체적인 근거 제시 단계. 여기서 처음으로 실제 수치·기준·검증 절차·단계별 프로세스 같은 "디테일"을 풀어써. HOOK이나 셀링포인트에서 이미 쓴 표현을 그대로 재사용하지 마.
 - headline: 반드시 "메인 셀포" 입력 내용을 소재로 만들어. 다른 정보(선별기준, 강점 등)를 소재로 쓰지 마. 만약 "메인 셀포"가 미기재라면 "일반 판매자 대비 강점"을 대신 소재로 쓰고, main_selling 필드는 null로 응답해.
 - headline 형식을 다양하게 써. "~한 경험 있으신가요?" 패턴만 반복하지 말고, 아래처럼 다양한 방식을 상황에 맞게 섞어서 써: 단정적 문제제기("자잘한 새우, 이제 그만 드세요"), 대비형("작은 게 아니라 큰 걸 드셔야 하는 이유"), 숫자 활용형, 대화체 등. 매번 같은 패턴을 쓰지 않도록 신경써.
-- hook_story: headline 바로 아래 이어지는 훅 문단들이야. 4~6개를 만들되 각 문단이 헤드라인처럼 눈에 걸리는 훅 톤이어야 해(밋밋한 설명체 금지). 각 문단은 서로 다른 강점/각도를 다뤄서 디자이너가 골라 쓸 참고자료가 풍부하게 나오도록 해. 흐름: 공감형 문제제기 → 원인 → "하지만 우리는" 강점1 → 강점2를 다른 각도로 → 감각적 묘사/신뢰요소 → 상품 소개 마무리. 각 문단 40~70자, 앞 문단과 자연스럽게 이어지되 같은 말 반복 금지. 단, 구체적 수치·과정 디테일은 선별기준 섹션에 남겨두고 여기서는 방향과 훅에 집중해.
+- hook_story: headline 바로 아래 오는 2~3문단 설명이야. 아래 흐름으로 스토리텔링하듯 써: (1문단) 왜 그런 문제/아쉬움이 일반적으로 생기는지 원인이나 배경 설명 → (2문단) "하지만 우리는" 식으로 메인 셀포 내용을 근거로 어떻게 다르게 하는지 설명(단, 구체적 수치·과정은 선별기준 섹션에 남겨두고 여기서는 방향만 언급) → (3문단, 선택) 그래서 어떤 상품을 소개하는지로 자연스럽게 마무리. 각 문단은 40~70자 내외로, 담백하고 진솔한 톤으로 써.
+- hook_variations: 이건 headline과 별개로, 디자이너가 골라 쓸 수 있는 "독립적인 훅 헤드라인 후보 모음"이야. 4~6개를 만들어. 각 후보는 서로 완전히 다른 각도/형식이어야 해(하나의 이어지는 글이 아니라, 각각 따로 떼서 배너·상단 카피로 쓸 수 있는 완성된 헤드라인). headline(15~30자, 굵고 임팩트 있게)과 그 아래 붙일 sub(서브멘트 한 줄, 25~45자)로 구성돼. 예시 형식을 다양하게: 단정형("자잘한 생선, 이제 그만"), 질문형("크기가 다르면 맛도 다른 거 아세요?"), 숫자형, 대비형, 손실회피형 등. 이미 만든 headline과도 겹치지 않게 새로운 표현으로 다양하게 제시해.
 - badges: 숫자·기준이 들어간 게 있으면 우선적으로 앞에 배치 (예: "16브릭스+"처럼 구체적 수치가 신뢰를 높임).
 - story_points의 detail: 여기서부터 본격적으로 구체화해. "왜 이게 고객에게 이득인지"를 감각적 묘사(맛, 식감, 신선함 등)나 비교(보통 vs 우리), 그리고 실제 수치·검증 절차를 근거로 설명해서 읽는 사람이 머릿속에 그려지게 써.
 - compare_generic (일반 판매자 항목)은 특히 조심해서 써: "일반 판매자 특징"에 사용자가 직접 적은 내용이 있으면 그것만 근거로 쓰고, 없으면 절대 "우리 강점을 기계적으로 뒤집어서" 만들지 마 (예: 우리가 "항공직송"이라고 "일반 판매자는 선박으로 신선도가 떨어진다"처럼 검증 안 된 구체적 사실을 지어내면 안 돼). 대신 업계에 흔히 알려진 일반적이고 두루뭉술한 표현(예: "품질 기준이 제각각", "선별 과정 비공개", "가격 경쟁 위주")을 사용해서 근거 없는 비방처럼 보이지 않게 해.
@@ -1400,7 +1434,8 @@ ${buildContextBlock(inp)}
 {
   "badges": ["짧은 신뢰배지 4개 (각 6자 내외)"],
   "headline": "문제제기형 훅 헤드라인 (30자 내외, 질문형이면 반드시 hook_story에서 그 질문에 답해줘야 해)",
-  "hook_story": ["headline 아래 이어지는 훅 문단들을 4~6개 만들어. 각 문단은 40~70자이고, 서로 다른 각도에서 상품의 강점을 후킹 톤으로 다뤄. 흐름 예시: (1) 문제/공감으로 시작 → (2) 그 문제가 왜 생기는지 → (3) '하지만 우리는' 강점1 → (4) 강점2를 다른 각도로 → (5) 감각적 묘사나 신뢰요소 → (6) 상품 소개로 마무리. 각 문단은 앞 문단과 자연스럽게 이어지되 같은 말 반복 없이, 헤드라인처럼 눈에 걸리는 훅 문장으로 써. 디자이너가 이 문단들 중 골라 쓸 수 있도록 다양하게 제시하는 게 목적이야."],
+  "hook_story": ["headline 아래 오는 설명 문단 1 (40~70자, 문제/배경 설명)", "설명 문단 2 (40~70자, '하지만 우리는' 식으로 메인 셀포 근거 제시)", "설명 문단 3, 선택 (40~70자, 상품 소개로 자연스럽게 마무리)"],
+  "hook_variations": [{"headline":"독립적으로 쓸 수 있는 훅 헤드라인 후보 (15~30자, 굵고 임팩트 있게)", "sub":"그 헤드라인 아래 붙일 서브멘트 한 줄 (25~45자)"}],
   "guarantee_tag": "보증 배지 한 줄 (15자 내외)",
   "story_points": [
     {"point":"'선별 기준'에서 사용자가 입력한 문장(줄바꿈 기준) 하나하나를 자연스러운 한 문장으로 다듬은 것 (35자 내외)", "detail":"그 문장을 뒷받침하는 후킹 부가설명 1~2문장 (60~90자). 왜 이 기준이 중요한지, 고객에게 어떤 이득이 되는지를 설득력 있게 풀어써줘."}
@@ -1438,6 +1473,7 @@ order_suggestions는 지금 입력된 정보를 근거로 "이 상품은 이렇�
 
       renderBadges(r.badges); renderRankLine(rank);
       renderHook(r.headline, r.guarantee_tag, r.hook_story);
+      renderHookVariations(r.hook_variations);
       const storyPoints = r.story_points||[];
       renderStory(storyPoints);
       renderCompareImages();
@@ -1468,7 +1504,7 @@ order_suggestions는 지금 입력된 정보를 근거로 "이 상품은 이렇�
       lastDetailData = {
         name, origin, weight,
         badges: r.badges||[], rank,
-        headline: r.headline||'', guarantee_tag: r.guarantee_tag||'', hook_story: r.hook_story||[],
+        headline: r.headline||'', guarantee_tag: r.guarantee_tag||'', hook_story: r.hook_story||[], hook_variations: r.hook_variations||[],
         story_points: storyPoints,
         compare_generic: r.compare_generic||[], compare_ours: r.compare_ours||[],
         compareImgGeneric: genericImgDataUrl, compareImgOurs: oursImgDataUrl,
@@ -1504,6 +1540,12 @@ order_suggestions는 지금 입력된 정보를 근거로 "이 상품은 이렇�
       schema: '{"badges": ["짧은 신뢰배지 4개 (각 6자 내외)"]}',
       apply(r){ if(!lastDetailData) return; lastDetailData.badges = r.badges||[]; renderBadges(lastDetailData.badges); }
     },
+    hookvar: {
+      label: '훅 헤드라인 후보',
+      instruction: '디자이너가 골라 쓸 "독립적인 훅 헤드라인 후보"를 4~6개 완전히 새로운 표현으로 다시 만들어줘. 각 후보는 서로 다른 형식(단정형/질문형/숫자형/대비형/손실회피형 등)이고, headline(15~30자)과 sub(25~45자)로 구성. 이전 것과 겹치지 않게.',
+      schema: '{"hook_variations":[{"headline":"...(15~30자)","sub":"...(25~45자)"}]}',
+      apply(r){ if(!lastDetailData) return; lastDetailData.hook_variations = r.hook_variations||[]; renderHookVariations(lastDetailData.hook_variations); }
+    },
     recommend: {
       label: '추천 카피',
       instruction: '디자이너 참고용 "추천 카피 모음"을 완전히 새로운 문구들로 다시 만들어줘. 문제제기형/숫자·근거형/손실회피형/감성·스토리형/비교우위형 5개 카테고리에 각 2~3개씩, 이전과 겹치지 않는 표현으로.',
@@ -1531,7 +1573,7 @@ order_suggestions는 지금 입력된 정보를 근거로 "이 상품은 이렇�
     hook: {
       label: 'HOOK',
       instruction: '훅 헤드라인, hook_story(2~3문단 설명), 보증배지 문구를 표현을 바꿔서 새 버전으로 다시 만들어줘. headline은 반드시 "메인 셀포" 입력 내용을 소재로 해야 하고, "~한 경험 있으신가요?" 패턴만 반복하지 말고 다양한 형식을 써.',
-      schema: '{"headline":"메인 셀포를 소재로 한 훅 헤드라인 (30자 내외)","hook_story":["이어지는 훅 문단 4~6개, 각 40~70자, 서로 다른 강점을 다른 각도로"],"guarantee_tag":"보증 배지 한 줄 (15자 내외)"}',
+      schema: '{"headline":"메인 셀포를 소재로 한 훅 헤드라인 (30자 내외)","hook_story":["설명 문단1 (40~70자)","설명 문단2 (40~70자)","설명 문단3, 선택 (40~70자)"],"guarantee_tag":"보증 배지 한 줄 (15자 내외)"}',
       apply(r){ if(!lastDetailData) return; lastDetailData.headline=r.headline||''; lastDetailData.guarantee_tag=r.guarantee_tag||''; lastDetailData.hook_story=r.hook_story||[]; renderHook(lastDetailData.headline, lastDetailData.guarantee_tag, lastDetailData.hook_story); }
     },
     story: {
@@ -1625,6 +1667,11 @@ ${field.schema}`;
     if(d.hook_story && d.hook_story.length) d.hook_story.forEach(p=> lines.push(p));
     if(d.guarantee_tag) lines.push(`[보증] ${d.guarantee_tag}`);
     lines.push('');
+    if(d.hook_variations && d.hook_variations.length){
+      lines.push('02-1. 훅 헤드라인 후보 (디자이너 참고용)');
+      d.hook_variations.forEach((v,i)=>{ lines.push(`  ${i+1}) ${v.headline||''}`); if(v.sub) lines.push(`     ${v.sub}`); });
+      lines.push('');
+    }
     lines.push('02b. 핵심 셀링포인트');
     if(d.main_selling) lines.push(`  [메인] ${d.main_selling.title}: ${d.main_selling.caption}`);
     (d.selling_points||[]).forEach(sp=>{ lines.push(`  - ${sp.title}: ${sp.caption}`); });
